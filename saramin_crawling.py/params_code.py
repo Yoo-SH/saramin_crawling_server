@@ -68,3 +68,13 @@ class ConfigCode:
         "지원자순": "apply_cnt",
         "사원수순": "employ_cnt",
     }
+
+    # inner_com_type (param code)
+
+    COMPANY_CODES = {
+        "기업형태 전체": "",
+        "대기업": "scale001",
+        "외국계": "foreign",
+        "중견·중소": "scale003",
+        "공사·공기업": "public",
+    }
