@@ -56,3 +56,15 @@ class ConfigCode:
         "금융·보험": 17,
         "공공·복지": 20,
     }
+
+    # recruitSort (param code)
+
+    SORT_CODES = {
+        "관련도순": "relation",
+        "정확도순": "accuracy",
+        "등록일순": "reg_dt",
+        "수정일순": "edit_dt",
+        "마감일순": "closing_dt",
+        "지원자순": "apply_cnt",
+        "사원수순": "employ_cnt",
+    }
