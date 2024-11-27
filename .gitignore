@@ -3,3 +3,5 @@
 **/mylog.md
 
 .env
+
+__pycache__/
