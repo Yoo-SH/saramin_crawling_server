@@ -104,7 +104,3 @@ def crawl_saramin(keyword, pages=1):
             continue
 
     return pd.DataFrame(jobs)
-
-    # PostgreSQL 데이터베이스에 저장
-    # engine = create_engine("postgresql://username:password@localhost:5432/saramin_jobs")
-    # df.to_sql("jobs", engine, if_exists="replace", index=False)
