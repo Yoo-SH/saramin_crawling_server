@@ -76,16 +76,16 @@ def crawl_saramin(keyword, pages=1):
 
                     jobs.append(
                         {
-                            "회사명": company,
-                            "제목": title,
-                            "링크": link,
-                            "지역": location,
-                            "경력": experience,
-                            "학력": education,
-                            "고용형태": employment_type,
-                            "마감일": deadline,
-                            "직무분야": sector,
-                            "연봉정보": salary,
+                            "company": company,
+                            "title": title,
+                            "link": link,
+                            "location": location,
+                            "experience": experience,
+                            "education": education,
+                            "employment_type": employment_type,
+                            "deadline": deadline,
+                            "sector": sector,
+                            "salary": salary,
                         }
                     )
 
