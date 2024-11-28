@@ -1,0 +1,9 @@
+*.md
+*.json
+*.mjs
+*.yml
+*.yaml
+*.lock
+.vscode/
+
+
