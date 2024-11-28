@@ -10,4 +10,14 @@ export class Auth {
     @OneToOne(() => Users)
     @JoinColumn()
     user: Users;
+
+    @Column({ unique: true, nullable: false })
+    email: string;
+
+    @Column({ nullable: false })
+    password: string;
+
+    @Column()
+    refreshToken: string;
+
 }
