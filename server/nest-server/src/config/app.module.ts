@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config'; // 환경 변수 모듈과 서비스를 가져옴
 import { UsersModule } from 'src/module/users/users.module';
 import { AuthModule } from 'src/module/auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -28,7 +29,21 @@ import { AuthModule } from 'src/module/auth/auth.module';
 
       }),
     }),
+
+
+    JwtModule.registerAsync({
+      imports: [ConfigModule], // ConfigModule을 주입하여 환경 변수 사용 가능
+      inject: [ConfigService], // ConfigService를 통해 환경 변수 접근
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET_KEY'), // 서명 자체가 아니라, 서명을 생성하는 데 사용되는 비밀 키
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN'), // access token 만료 시간
+        }, // 환경 변수에서 만료 시간 가져오기
+      }),
+      global: true, // 이 옵션을 사용하면 JwtModule을 글로벌로 설정하여 모든 모듈에서 사용 가능
+    }),
     UsersModule, AuthModule],
+
   controllers: [AppController],
   providers: [AppService],
 })
