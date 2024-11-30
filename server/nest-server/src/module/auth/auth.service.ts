@@ -1,6 +1,6 @@
-import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, QueryRunner, DataSource } from 'typeorm';
+import { Repository, QueryRunner, DataSource, In } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateLoginDto } from './dto/create-login.dto';
 import { Users } from '../users/entity/users.entity';
@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt'; // Add this line to fix the type error
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes } from 'crypto';
 import { ConfigService } from '@nestjs/config';
+import { error } from 'console';
 
 interface Token {
     accessToken: string; //액세스 토큰
@@ -96,28 +97,36 @@ export class AuthService {
     }
 
     async createLogin(createLoginDto: CreateLoginDto) {
-        const { email, password } = createLoginDto;
+        try {
+            const { email, password } = createLoginDto;
 
-        const auth = await this.repo_auth.findOne({
-            where: { email }, relations: ['user'],
-        });
-        if (!auth) {
-            throw new NotFoundException('등록되지 않은 이메일입니다.');
+            const auth = await this.repo_auth.findOne({
+                where: { email }, relations: ['user'],
+            });
+            if (!auth) {
+                throw new NotFoundException('등록되지 않은 이메일입니다.');
+            }
+
+            const isValidPassword = await bcrypt.compare(password, auth.password);
+            if (!isValidPassword) {
+                throw new NotFoundException('비밀번호가 일치하지 않습니다.');
+            }
+
+            const tokens = await this.generateToken(auth.user.id);
+            await this.saveRefreshToken(auth.user.id, tokens.refreshToken);
+
+            return {
+                message: '로그인에 성공하였습니다.',
+                data: { username: auth.user.name, email: auth.email, accessTokens: tokens.accessToken },
+                statusCode: HttpStatus.OK,
+            };
+
+        } catch (error) {
+            if (error instanceof Error) {
+                throw error
+            }
+            throw new InternalServerErrorException('로그인 중 오류가 발생했습니다.');
         }
-
-        const isValidPassword = await bcrypt.compare(password, auth.password);
-        if (!isValidPassword) {
-            throw new NotFoundException('비밀번호가 일치하지 않습니다.');
-        }
-
-        const tokens = await this.generateToken(auth.user.id);
-        await this.saveRefreshToken(auth.user.id, tokens.refreshToken);
-
-        return {
-            message: '로그인에 성공하였습니다.',
-            data: { username: auth.user.name, email: auth.email, accessTokens: tokens.accessToken },
-            statusCode: HttpStatus.OK,
-        };
     }
 
     async generateToken(user_id: Users['id']): Promise<Token> {
