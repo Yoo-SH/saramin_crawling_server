@@ -122,14 +122,14 @@ export class AuthService {
             // 쿠키 설정
             res.cookie('access_token', tokens.accessToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 60 * 60 * 1000,
+                secure: this.configService.get<boolean>("COOKIE_ACCESS_HTTPS"), //https에서만 쿠키 전송할지 여부
+                maxAge: this.configService.get<number>("COOKIE_ACCESS_EXPIRES_IN"),
             });
 
             res.cookie('refresh_token', tokens.refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
+                secure: this.configService.get<boolean>("COOKIE_REFRESH_HTTPS"), //https에서만 쿠키 전송할지 여부
+                maxAge: this.configService.get<number>("COOKIE_REFRESH_EXPIRES_IN"),
             });
 
             //@Res()를 사용할 때는 몇 가지 점을 고려해야 합니다:
@@ -209,7 +209,7 @@ export class AuthService {
             res.cookie('access_token', tokens.accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                maxAge: 60 * 60 * 1000,
+                maxAge: this.configService.get<number>('COOKIE_ACCESS_EXPIRES_IN'),
             });
 
             return res.status(HttpStatus.OK).json({
