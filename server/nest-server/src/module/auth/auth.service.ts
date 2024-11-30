@@ -1,7 +1,8 @@
-import { Injectable, HttpException, HttpStatus, ConflictException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryRunner, DataSource } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateLoginDto } from './dto/create-login.dto';
 import { Users } from '../users/entity/users.entity';
 import { Auth } from './entity/auth.entity';
 import * as bcrypt from 'bcrypt'; // Add this line to fix the type error
@@ -82,5 +83,27 @@ export class AuthService {
         const salt = await bcrypt.genSalt();
         return bcrypt.hash(password, salt);
     }
-}
 
+    async createLogin(createLoginDto: CreateLoginDto) {
+        const { email, password } = createLoginDto;
+
+        const auth = await this.repo_auth.findOne({
+            where: { email }, relations: ['user'],
+        });
+        if (!auth) {
+            throw new NotFoundException('등록되지 않은 이메일입니다.');
+        }
+
+        const isValidPassword = await bcrypt.compare(password, auth.password);
+        if (!isValidPassword) {
+            throw new NotFoundException('비밀번호가 일치하지 않습니다.');
+        }
+
+
+        return {
+            message: '로그인에 성공하였습니다.',
+            data: { username: auth.user, email: auth.email },
+            statusCode: HttpStatus.OK,
+        };
+    }
+}
