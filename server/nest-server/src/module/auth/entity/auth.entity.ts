@@ -17,7 +17,7 @@ export class Auth {
     @Column({ nullable: false })
     password: string;
 
-    @Column()
+    @Column({ nullable: true })
     refreshToken: string;
 
 }

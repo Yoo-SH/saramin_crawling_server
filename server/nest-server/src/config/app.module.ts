@@ -3,6 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config'; // 환경 변수 모듈과 서비스를 가져옴
+import { UsersModule } from 'src/module/users/users.module';
+import { AuthModule } from 'src/module/auth/auth.module';
 
 @Module({
   imports: [
@@ -14,10 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'; // 환경 변수 �
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-
-
       useFactory: (configService: ConfigService) => ({
-
         type: 'postgres',
         host: configService.get<string>('DB_HOST'), // 환경 변수 DB_HOST 사용
         port: parseInt(configService.get('DB_PORT'), 10), // 환경 변수 DB_PORT 사용, 문자열을 숫자로 변환
@@ -29,7 +28,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'; // 환경 변수 �
 
       }),
     }),
-  ],
+    UsersModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
