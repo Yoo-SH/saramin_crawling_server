@@ -4,6 +4,7 @@ import { Repository, QueryRunner, DataSource } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Users } from '../users/entity/users.entity';
 import { Auth } from './entity/auth.entity';
+import * as bcrypt from 'bcrypt'; // Add this line to fix the type error
 
 @Injectable()
 export class AuthService {
@@ -47,7 +48,7 @@ export class AuthService {
             const auth = new Auth();
             auth.user = savedUser;
             auth.email = email;
-            auth.password = password;
+            auth.password = await this.hashPassword(password);
 
             // Auth 엔티티 저장 (트랜잭션 사용)
             await queryRunner.manager.save(auth);
@@ -76,4 +77,10 @@ export class AuthService {
             await queryRunner.release();
         }
     }
+
+    async hashPassword(password: string): Promise<string> {
+        const salt = await bcrypt.genSalt();
+        return bcrypt.hash(password, salt);
+    }
 }
+
