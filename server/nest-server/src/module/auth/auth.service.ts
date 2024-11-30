@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryRunner, DataSource } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -6,13 +6,24 @@ import { CreateLoginDto } from './dto/create-login.dto';
 import { Users } from '../users/entity/users.entity';
 import { Auth } from './entity/auth.entity';
 import * as bcrypt from 'bcrypt'; // Add this line to fix the type error
+import { JwtService } from '@nestjs/jwt';
+import { randomBytes } from 'crypto';
+import { ConfigService } from '@nestjs/config';
+
+interface Token {
+    accessToken: string; //액세스 토큰
+    refreshToken: string; //리프레시 토큰
+}
+
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectRepository(Users) private readonly repo_users: Repository<Users>,
         @InjectRepository(Auth) private readonly repo_auth: Repository<Auth>,
-        private readonly dataSource: DataSource,
+        private jwtService: JwtService, // JWT 토큰을 생성 및 검증하기 위한 JwtService 주입
+        private readonly dataSource: DataSource, // QueryRunner를 생성하기 위한 DataSource 주입(트랜잭션 사용)
+        private readonly configService: ConfigService, // 환경 변수를 사용하기 위한 ConfigService 주입
     ) { }
 
     async createUser(createUserDto: CreateUserDto) {
@@ -99,11 +110,88 @@ export class AuthService {
             throw new NotFoundException('비밀번호가 일치하지 않습니다.');
         }
 
+        const tokens = await this.generateToken(auth.user.id);
+        await this.saveRefreshToken(auth.user.id, tokens.refreshToken);
 
         return {
             message: '로그인에 성공하였습니다.',
-            data: { username: auth.user, email: auth.email },
+            data: { username: auth.user.name, email: auth.email, accessTokens: tokens.accessToken },
             statusCode: HttpStatus.OK,
         };
     }
+
+    async generateToken(user_id: Users['id']): Promise<Token> {
+        // 로그인 할 때마다 새로운 토큰으로 인지되도록 랜덤값 생성
+        const randomValue = randomBytes(16).toString('hex');
+
+        // 액세스 토큰 생성 (15분 유효기간)
+        const accessToken = this.jwtService.sign(
+            { user_id: user_id, random: randomValue }, // sub는 토큰 소유자의 ID를 나타내는 키를 sub로 설정
+            //엑세스 토큰은 전역적으로 설정된 JWT_SECRET_KEY, EXPIRES_IN을 사용하여 생성, 가드 등에서 전역키로 사용가능
+        );
+
+        // 리프레시 토큰 생성 (7일 유효기간)
+        const refreshToken = this.jwtService.sign(
+            { user_id: user_id, random: randomValue },
+            { secret: this.configService.get<string>('REFRESH_SECRET'), expiresIn: this.configService.get<string>('REFRESH_EXPIRES_IN') },
+        );
+
+        return { accessToken, refreshToken }; // 생성된 토큰 반환
+    }
+
+
+    /* 리프레시 토큰을 사용자 DB에 저장하는 메소드*/
+    async saveRefreshToken(user_id: Users['id'], refreshToken: string) {
+        const user = await this.repo_users.findOne({ where: { id: user_id } });
+        const auth = await this.repo_auth.findOne({ where: { user: { id: user_id } } });
+
+        if (!user) {
+            throw new NotFoundException('해당 유저를 찾을 수 없습니다. updateRefreshToken');
+        }
+
+        auth.refreshToken = refreshToken;
+        return await this.repo_auth.save(auth);
+    }
+
+
+    /* 새로운 액세스 토큰 발급 메소드 */
+    async refreshAccessToken(refreshToken: string): Promise<Token> {
+        // 리프레시 토큰의 유효성을 검증
+        const payload = this.jwtService.verify(refreshToken, {
+            secret: 'refresh_secret',
+        });
+
+        // 사용자 정보를 가져옵니다.
+        const user = await this.repo_users.findOne({ where: { id: payload.user_id } });
+        const auth = await this.repo_auth.findOne({ where: { user: { id: payload.user_id } } });
+
+        // 사용자 또는 토큰이 유효하지 않을 경우, 인증 오류 발생
+        if (!user || !auth.refreshToken || auth.refreshToken !== refreshToken) {
+            console.log('refreshToken:', refreshToken);
+            console.log('user.refreshToken:', auth.refreshToken);
+
+            throw new UnauthorizedException('유효하지 않은 사용자입니다.');
+        }
+
+        // 새로운 액세스 및 리프레시 토큰을 생성합니다.
+        const tokens = await this.generateToken(user.id);
+        await this.saveRefreshToken(user.id, tokens.refreshToken); // 새로운 리프레시 토큰 저장
+
+        return tokens;
+    }
+
+    /*리프레시 토큰을 삭제하는 메소드*/
+    async removeRefreshToken(refreshToken: string) {
+        const auth = await this.repo_auth.findOne({ where: { refreshToken } });
+        if (!auth) {
+            throw new NotFoundException('해당 유저를 찾을 수 없습니다. removeRefreshToken');
+        }
+
+        auth.refreshToken = null;
+        return this.repo_auth.save(auth);
+    }
+
+
+
+
 }
