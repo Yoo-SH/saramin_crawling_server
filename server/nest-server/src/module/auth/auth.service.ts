@@ -134,15 +134,13 @@ export class AuthService {
     }
 
     async generateToken(user_id: Users['id']): Promise<Token> {
-        // 로그인 할 때마다 새로운 토큰으로 인지되도록 랜덤값 생성
-        const randomValue = randomBytes(16).toString('hex');
-
         // 액세스 토큰 생성 (15분 유효기간)
         const accessToken = this.jwtService.sign(
             { user_id: user_id }, // sub는 토큰 소유자의 ID를 나타내는 키를 sub로 설정
             //엑세스 토큰은 전역적으로 설정된 JWT_SECRET_KEY, EXPIRES_IN을 사용하여 생성, 가드 등에서 전역키로 사용가능
         );
 
+        console.log('accessToken:', accessToken.toString());
         // 리프레시 토큰 생성 (7일 유효기간)
         const refreshToken = this.jwtService.sign(
             { user_id: user_id },
