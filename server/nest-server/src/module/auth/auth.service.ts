@@ -139,13 +139,13 @@ export class AuthService {
 
         // 액세스 토큰 생성 (15분 유효기간)
         const accessToken = this.jwtService.sign(
-            { user_id: user_id, random: randomValue }, // sub는 토큰 소유자의 ID를 나타내는 키를 sub로 설정
+            { user_id: user_id }, // sub는 토큰 소유자의 ID를 나타내는 키를 sub로 설정
             //엑세스 토큰은 전역적으로 설정된 JWT_SECRET_KEY, EXPIRES_IN을 사용하여 생성, 가드 등에서 전역키로 사용가능
         );
 
         // 리프레시 토큰 생성 (7일 유효기간)
         const refreshToken = this.jwtService.sign(
-            { user_id: user_id, random: randomValue },
+            { user_id: user_id },
             { secret: this.configService.get<string>('REFRESH_SECRET'), expiresIn: this.configService.get<string>('REFRESH_EXPIRES_IN') },
         );
 
