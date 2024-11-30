@@ -1,5 +1,6 @@
 import { OneToOne, Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 import { Auth } from '../../auth/entity/auth.entity';
+import { last } from 'rxjs';
 @Entity()
 export class Users {
     @PrimaryGeneratedColumn()
@@ -13,6 +14,9 @@ export class Users {
 
     @UpdateDateColumn()
     updateAt: Date;
+
+    @UpdateDateColumn()
+    lastLoginAt: Date;
 
     @DeleteDateColumn()
     deleteAt: Date;

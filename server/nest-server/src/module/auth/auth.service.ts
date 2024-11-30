@@ -115,6 +115,10 @@ export class AuthService {
             const tokens = await this.generateToken(auth.user.id);
             await this.saveRefreshToken(auth.user.id, tokens.refreshToken);
 
+            // 로그인 이력 저장
+            auth.user.lastLoginAt = new Date();
+            await this.repo_users.save(auth.user);
+
             return {
                 message: '로그인에 성공하였습니다.',
                 data: { username: auth.user.name, email: auth.email, accessTokens: tokens.accessToken },
