@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException, UnauthorizedException, InternalServerErrorException, Res } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryRunner, DataSource, In } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt'; // Add this line to fix the type error
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { CreateRefreshDto } from './dto/create-refresh.dto';
+import { Response } from 'express';
 
 interface Token {
     accessToken: string; //액세스 토큰
@@ -95,7 +96,7 @@ export class AuthService {
         return bcrypt.hash(password, salt);
     }
 
-    async createLogin(createLoginDto: CreateLoginDto) {
+    async createLogin(createLoginDto: CreateLoginDto, @Res() res: Response) {
         try {
             const { email, password } = createLoginDto;
 
@@ -118,11 +119,27 @@ export class AuthService {
             auth.user.lastLoginAt = new Date();
             await this.repo_users.save(auth.user);
 
-            return {
+            // 쿠키 설정
+            res.cookie('access_token', tokens.accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 60 * 60 * 1000,
+            });
+
+            res.cookie('refresh_token', tokens.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+
+            //@Res()를 사용할 때는 몇 가지 점을 고려해야 합니다:
+            //1 @Res() 데코레이터를 사용하면 Express의 Response 객체를 사용할 수 있습니다.
+            //2.@Res()를 사용하면 NestJS의 기본 자동 반환 메커니즘을 사용할 수 없습니다. 즉, 직접 res.status().json()과 같은 방식으로 응답을 전송해 주어야 합니다.
+            return res.status(HttpStatus.OK).json({
                 message: '로그인에 성공하였습니다.',
-                data: { username: auth.user.name, email: auth.email, accessTokens: tokens.accessToken, refreshTokens: tokens.refreshToken },
+                data: { username: auth.user.name, email: auth.email },
                 statusCode: HttpStatus.OK,
-            };
+            });
 
         } catch (error) {
             if (error instanceof Error) {
@@ -139,7 +156,6 @@ export class AuthService {
             //엑세스 토큰은 전역적으로 설정된 JWT_SECRET_KEY, EXPIRES_IN을 사용하여 생성, 가드 등에서 전역키로 사용가능
         );
 
-        console.log('accessToken:', accessToken.toString());
         // 리프레시 토큰 생성 (7일 유효기간)
         const refreshToken = this.jwtService.sign(
             { user_id: user_id },
@@ -165,7 +181,7 @@ export class AuthService {
 
 
     /* 새로운 액세스 토큰 발급 메소드 */
-    async createNewAccessTokenByRefreshToken(createRefreshDto: CreateRefreshDto) {
+    async createNewAccessTokenByRefreshToken(createRefreshDto: CreateRefreshDto, @Res() res: Response) {
         const { refreshToken } = createRefreshDto;
 
         try {
@@ -189,15 +205,20 @@ export class AuthService {
             const tokens = await this.generateToken(user.id);
             await this.saveRefreshToken(user.id, tokens.refreshToken); // 새로운 리프레시 토큰 저장
 
-            return {
+            // 쿠키 설정
+            res.cookie('access_token', tokens.accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 60 * 60 * 1000,
+            });
+
+            return res.status(HttpStatus.OK).json({
                 message: '토큰이 갱신되었습니다.',
                 data: {
                     username: user.name,
-                    accessToken: tokens.accessToken,
-                    refreshToken: tokens.refreshToken,
                 },
                 statusCode: HttpStatus.OK,
-            }
+            });
         } catch (error) {
             if (error instanceof UnauthorizedException) {
                 if (error.name === 'TokenExpiredError') {
