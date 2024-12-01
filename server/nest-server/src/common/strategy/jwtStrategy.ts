@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/module/users/users.service';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(private readonly usersService: UsersService,

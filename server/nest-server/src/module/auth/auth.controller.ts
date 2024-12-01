@@ -1,9 +1,11 @@
-import { Body, Controller, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Post, Put, Res, UseGuards, Req } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateLoginDto } from './dto/create-login.dto';
 import { AuthService } from './auth.service';
 import { CreateRefreshDto } from './dto/create-refresh.dto';
-import { Response } from 'express';
+import { Response, Request } from 'express';
+import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,8 +26,9 @@ export class AuthController {
         return this.authService.createNewAccessTokenByRefreshToken(body, res);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Put('profile')
-    updateProfile() {
-        // Implement profile update logic here
+    updateProfile(@Req() Req, @Body() body: UpdateProfileDto) {
+        return this.authService.updateProfile(Req.user.id, body);
     }
 }

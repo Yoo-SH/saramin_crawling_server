@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryRunner, DataSource, In } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateLoginDto } from './dto/create-login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Users } from '../users/entity/users.entity';
 import { Auth } from './entity/auth.entity';
 import * as bcrypt from 'bcrypt'; // Add this line to fix the type error
@@ -118,6 +119,7 @@ export class AuthService {
             // 로그인 이력 저장
             auth.user.lastLoginAt = new Date();
             await this.repo_users.save(auth.user);
+            console.log(new Date());
 
             // 쿠키 설정
             res.cookie('access_token', tokens.accessToken, {
@@ -239,5 +241,41 @@ export class AuthService {
 
         auth.refreshToken = null;
         return this.repo_auth.save(auth);
+    }
+
+
+    async updateProfile(user_id: Users['id'], updateProfileDto: UpdateProfileDto) {
+        const { newName, currentPassword, newPassword } = updateProfileDto;
+
+        const user = await this.repo_users.findOne({ where: { id: user_id } });
+        if (!user) {
+            throw new NotFoundException('해당 유저를 찾을 수 없습니다. updateProfile');
+        }
+
+        // 이름 변경을 선택했다면, 중복된 이름이 있는지 확인
+        if (newName) {
+            const existingUser = await this.repo_users.findOne({ where: { name: newName } });
+            if (existingUser) {
+                throw new ConflictException('이미 사용 중인 이름입니다.');
+            }
+            user.name = newName;
+        }
+
+        // 비밀번호 변경
+        if (currentPassword && newPassword) {
+            const auth = await this.repo_auth.findOne({ where: { user: { id: user_id } } });
+            const isValidPassword = await bcrypt.compare(currentPassword, auth.password);
+            if (!isValidPassword) {
+                throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+            }
+            auth.password = await this.hashPassword(newPassword);
+            await this.repo_auth.save(auth);
+        }
+
+        return {
+            message: '프로필이 수정되었습니다.',
+            data: { username: user.name },
+            statusCode: HttpStatus.OK,
+        };
     }
 }
