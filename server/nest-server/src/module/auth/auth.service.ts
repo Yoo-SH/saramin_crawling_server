@@ -1,4 +1,5 @@
-import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException, UnauthorizedException, InternalServerErrorException, Res } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException, UnauthorizedException, InternalServerErrorException, Res, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryRunner, DataSource, In } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -230,6 +231,24 @@ export class AuthService {
                 throw error;
             }
             throw new InternalServerErrorException('토큰 갱신 중 오류가 발생했습니다.');
+        }
+    }
+
+    async createLogout(user_id: Users['id'], @Req() req: Request, @Res() res: Response) {
+        try {
+            await this.removeRefreshToken(req.cookies['refresh_token']);
+
+            // 쿠키 삭제
+            res.clearCookie('access_token');
+            res.clearCookie('refresh_token');
+
+            return res.status(HttpStatus.OK).json({
+                message: '로그아웃 되었습니다.',
+                statusCode: HttpStatus.OK,
+            });
+        } catch (error) {
+            console.error(error);
+            throw new InternalServerErrorException('로그아웃 중 오류가 발생했습니다.');
         }
     }
 

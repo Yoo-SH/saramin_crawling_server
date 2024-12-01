@@ -31,6 +31,7 @@ export class UsersService {
     /*사용자 ID로 사용자 조회*/
     async findUsersById(user_id: number) {
         try {
+            console.log(user_id);
             const user = await this.repo_user.findOne({ where: { id: user_id } });
 
             if (!user) {
