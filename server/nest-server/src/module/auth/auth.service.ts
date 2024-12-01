@@ -245,37 +245,42 @@ export class AuthService {
 
 
     async updateProfile(user_id: Users['id'], updateProfileDto: UpdateProfileDto) {
-        const { newName, currentPassword, newPassword } = updateProfileDto;
+        try {
+            const { newName, currentPassword, newPassword } = updateProfileDto;
 
-        const user = await this.repo_users.findOne({ where: { id: user_id } });
-        if (!user) {
-            throw new NotFoundException('해당 유저를 찾을 수 없습니다. updateProfile');
-        }
-
-        // 이름 변경을 선택했다면, 중복된 이름이 있는지 확인
-        if (newName) {
-            const existingUser = await this.repo_users.findOne({ where: { name: newName } });
-            if (existingUser) {
-                throw new ConflictException('이미 사용 중인 이름입니다.');
+            const user = await this.repo_users.findOne({ where: { id: user_id } });
+            if (!user) {
+                throw new NotFoundException('해당 유저를 찾을 수 없습니다. updateProfile');
             }
-            user.name = newName;
-        }
 
-        // 비밀번호 변경
-        if (currentPassword && newPassword) {
-            const auth = await this.repo_auth.findOne({ where: { user: { id: user_id } } });
-            const isValidPassword = await bcrypt.compare(currentPassword, auth.password);
-            if (!isValidPassword) {
-                throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+            // 이름 변경을 선택했다면, 중복된 이름이 있는지 확인
+            if (newName) {
+                const existingUser = await this.repo_users.findOne({ where: { name: newName } });
+                if (existingUser) {
+                    throw new ConflictException('이미 사용 중인 이름입니다.');
+                }
+                user.name = newName;
             }
-            auth.password = await this.hashPassword(newPassword);
-            await this.repo_auth.save(auth);
-        }
 
-        return {
-            message: '프로필이 수정되었습니다.',
-            data: { username: user.name },
-            statusCode: HttpStatus.OK,
-        };
+            // 비밀번호 변경
+            if (currentPassword && newPassword) {
+                const auth = await this.repo_auth.findOne({ where: { user: { id: user_id } } });
+                const isValidPassword = await bcrypt.compare(currentPassword, auth.password);
+                if (!isValidPassword) {
+                    throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+                }
+                auth.password = await this.hashPassword(newPassword);
+                await this.repo_auth.save(auth);
+            }
+
+            return {
+                message: '프로필이 수정되었습니다.',
+                data: { username: user.name },
+                statusCode: HttpStatus.OK,
+            };
+
+        } catch (error) {
+            throw new InternalServerErrorException('프로필 수정 중 오류가 발생했습니다.');
+        }
     }
 }
