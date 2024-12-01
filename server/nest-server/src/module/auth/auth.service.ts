@@ -1,4 +1,5 @@
-import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException, UnauthorizedException, InternalServerErrorException, Res } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundException, UnauthorizedException, InternalServerErrorException, Res, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryRunner, DataSource, In } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -10,6 +11,7 @@ import * as bcrypt from 'bcrypt'; // Add this line to fix the type error
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { CreateRefreshDto } from './dto/create-refresh.dto';
+import { DeleteUserDto } from './dto/delete-user.dto';
 import { Response } from 'express';
 
 interface Token {
@@ -232,6 +234,24 @@ export class AuthService {
         }
     }
 
+    async createLogout(user_id: Users['id'], @Req() req: Request, @Res() res: Response) {
+        try {
+            await this.removeRefreshToken(req.cookies['refresh_token']);
+
+            // 쿠키 삭제
+            res.clearCookie('access_token');
+            res.clearCookie('refresh_token');
+
+            return res.status(HttpStatus.OK).json({
+                message: '로그아웃 되었습니다.',
+                statusCode: HttpStatus.OK,
+            });
+        } catch (error) {
+            console.error(error);
+            throw new InternalServerErrorException('로그아웃 중 오류가 발생했습니다.');
+        }
+    }
+
     /*리프레시 토큰을 삭제하는 메소드*/
     async removeRefreshToken(refreshToken: string) {
         const auth = await this.repo_auth.findOne({ where: { refreshToken } });
@@ -281,6 +301,58 @@ export class AuthService {
 
         } catch (error) {
             throw new InternalServerErrorException('프로필 수정 중 오류가 발생했습니다.');
+        }
+    }
+
+    async deleteUser(user_id: Users['id'], deleteProfileDto: DeleteUserDto) {
+        const { password } = deleteProfileDto;
+
+        const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            const user = await queryRunner.manager.findOne(Users, { where: { id: user_id } });
+            if (!user) {
+                throw new NotFoundException('해당 유저를 찾을 수 없습니다. deleteUser');
+            }
+
+            const auth = await queryRunner.manager.findOne(Auth, { where: { user: { id: user_id } } });
+            if (!auth) {
+                throw new NotFoundException('인증 정보를 찾을 수 없습니다.');
+            }
+
+            // 비밀번호 검증
+            const isValidPassword = await bcrypt.compare(password, auth.password);
+            if (!isValidPassword) {
+                throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+            }
+
+            // 유저 및 인증 정보 삭제
+
+            await queryRunner.manager.remove(auth);
+
+            await queryRunner.manager.remove(user);
+            // 트랜잭션 커밋
+            await queryRunner.commitTransaction();
+
+            return {
+                message: '회원 탈퇴가 완료되었습니다.',
+                statusCode: HttpStatus.OK,
+            };
+        } catch (error) {
+            // 트랜잭션 롤백
+            await queryRunner.rollbackTransaction();
+
+            // 예외 처리 전달
+            if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
+                throw error;
+            }
+            console.log(error);
+            throw new InternalServerErrorException('회원 탈퇴 중 오류가 발생했습니다.');
+        } finally {
+            // 트랜잭션 해제
+            await queryRunner.release();
         }
     }
 }

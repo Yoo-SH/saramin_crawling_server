@@ -26,11 +26,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     async validate(payload: any) {
         try {
             const user = await this.usersService.findUsersById(payload.user_id); // 사용자 ID로 사용자 조회, 여기서 user_id 가 db에서 존재하는지 예외처리함.
-
             // req.user: validate()에서 반환된 객체는 req.user에 할당되어, 이후 요청을 처리하는 곳에서 사용될 수 있습니다.
             // ex)  @UseGuards(JwtAuthGuard)
             //      @Get()
-            //      getProfile(@Request() req) {
+            //      getProfile(@Req() req) {
             //      console.log(req.user.id); 
             //      return { userId: req.user.id}
             return { id: user.data.user_id };
