@@ -6,6 +6,7 @@ import { CreateRefreshDto } from './dto/create-refresh.dto';
 import { Response, Request } from 'express';
 import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { DeleteUserDto } from './dto/delete-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -30,5 +31,11 @@ export class AuthController {
     @Put('profile')
     updateProfile(@Req() Req, @Body() body: UpdateProfileDto) {
         return this.authService.updateProfile(Req.user.id, body);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put('delete')
+    deleteUser(@Req() req, @Body() body: DeleteUserDto) {
+        return this.authService.deleteUser(req.user.id, body);
     }
 }
