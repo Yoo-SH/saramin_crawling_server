@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config'; // 환경 변수 모듈과 서비스를 가져옴
 import { UsersModule } from 'src/module/users/users.module';
 import { AuthModule } from 'src/module/auth/auth.module';
+import { JobsModule } from 'src/module/jobs/jobs.module';
 import { JwtModule } from '@nestjs/jwt';
 
 
@@ -43,7 +44,7 @@ import { JwtModule } from '@nestjs/jwt';
       }),
       global: true, // 이 옵션을 사용하면 JwtModule을 글로벌로 설정하여 모든 모듈에서 사용 가능
     }),
-    UsersModule, AuthModule],
+    UsersModule, AuthModule, JobsModule],
 
   controllers: [AppController],
   providers: [AppService],
