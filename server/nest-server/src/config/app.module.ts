@@ -7,6 +7,7 @@ import { UsersModule } from 'src/module/users/users.module';
 import { AuthModule } from 'src/module/auth/auth.module';
 import { JobsModule } from 'src/module/jobs/jobs.module';
 import { JwtModule } from '@nestjs/jwt';
+import { BookmarksModule } from 'src/module/bookmarks/bookmarks.module';
 
 
 @Module({
@@ -44,7 +45,7 @@ import { JwtModule } from '@nestjs/jwt';
       }),
       global: true, // 이 옵션을 사용하면 JwtModule을 글로벌로 설정하여 모든 모듈에서 사용 가능
     }),
-    UsersModule, AuthModule, JobsModule],
+    UsersModule, AuthModule, JobsModule, BookmarksModule],
 
   controllers: [AppController],
   providers: [AppService],

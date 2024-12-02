@@ -1,6 +1,6 @@
-import { OneToOne, Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { OneToOne, OneToMany, Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 import { Auth } from '../../auth/entity/auth.entity';
-import { last } from 'rxjs';
+import { Bookmark } from '../../bookmarks/entity/bookmarks.entity';
 @Entity()
 export class Users {
     @PrimaryGeneratedColumn()
@@ -20,6 +20,9 @@ export class Users {
 
     @DeleteDateColumn()
     deleteAt: Date;
+
+    @OneToMany(() => Bookmark, (bookmark) => bookmark.job)
+    bookmarks: Bookmark[];
 
     // 양방향 관계 설정
     @OneToOne(() => Auth, (auth) => auth.user)
