@@ -34,4 +34,7 @@ export class Jobs {
 
     @Column()
     salary: string;
+
+    @Column({ default: 0 })
+    viewCount: number;
 }
