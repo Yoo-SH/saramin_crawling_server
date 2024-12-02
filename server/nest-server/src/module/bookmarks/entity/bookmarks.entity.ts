@@ -4,7 +4,7 @@ import { Users } from '../../users/entity/users.entity';
 import { Jobs } from '../../jobs/entity/jobs.entity';
 
 @Entity()
-export class Bookmark {
+export class Bookmarks {
     @PrimaryGeneratedColumn()
     id: number;
 

@@ -1,5 +1,5 @@
 import { OneToMany, Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { Bookmark } from '../../bookmarks/entity/bookmarks.entity';
+import { Bookmarks } from '../../bookmarks/entity/bookmarks.entity';
 
 @Entity()
 export class Jobs {
@@ -39,8 +39,7 @@ export class Jobs {
     @Column({ default: 0 })
     viewCount: number;
 
-
-    @OneToMany(() => Bookmark, (bookmark) => bookmark.job)
-    bookmarks: Bookmark[];
+    @OneToMany(() => Bookmarks, (bookmark) => bookmark.job)
+    bookmarks: Bookmarks[];
 
 }
