@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Req, Body } from '@nestjs/common';
+import { Controller, Post, Get, UseGuards, Req, Body } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
 import { CreateBookmarkDto } from './dto/create-bookmarks.dto';
 import { BookmarksService } from './bookmarks.service';
@@ -11,7 +11,11 @@ export class BookmarksController {
     @Post()
     async createBookmarkToggle(@Req() req, @Body() body: CreateBookmarkDto) {
         return await this.bookmarksService.createBookmarkToggle(req.user.id, body.job_id);
+    }
 
+    @Get()
+    async getAllBookmarks() {
+        return await this.bookmarksService.getAllBookmarks();
     }
 
 
