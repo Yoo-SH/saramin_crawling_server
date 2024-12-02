@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Jobs } from './entity/jobs.entity';
 import { GetJobsDto } from './dto/get-jobs.dto';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class JobsService {
@@ -61,6 +62,36 @@ export class JobsService {
 
         } catch (error) {
             return { messeges: '실패', data: error, statusCode: 400 };
+        }
+    }
+
+    async getJob(job_id: number) {
+        try {
+            // 상세 정보 제공
+            const job = await this.repo_jobs.findOne({ where: { id: job_id } });
+            if (!job) {
+                throw new NotFoundException('해당 공고가 없습니다.');
+            }
+
+            //조회수 증가
+            job.viewCount += 1;
+            await this.repo_jobs.save(job);
+
+            //관련 공고 추천(company, 같은 회사의 다른 공고)
+            const relatedJobs = await this.repo_jobs.createQueryBuilder('job')
+                .where('job.company LIKE :company', { company: `%${job.company}%` })
+                .andWhere('job.id != :id', { id: job_id }) // 현재 job_id는 제외
+                .take(5)
+                .getMany();
+
+
+            return { messeges: '성공', data: { job, relatedJobs }, statusCode: 200 };
+
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('공고 상세 조회 중 서버에서 에러가 발생했습니다.');
         }
     }
 }
