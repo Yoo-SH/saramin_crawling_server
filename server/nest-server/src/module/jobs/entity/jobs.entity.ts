@@ -1,6 +1,6 @@
 import { OneToMany, Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { Bookmarks } from '../../bookmarks/entity/bookmarks.entity';
-
+import { Applications } from '../../applications/entity/applications.entity';
 @Entity()
 export class Jobs {
     @PrimaryGeneratedColumn()
@@ -41,5 +41,8 @@ export class Jobs {
 
     @OneToMany(() => Bookmarks, (bookmark) => bookmark.job)
     bookmarks: Bookmarks[];
+
+    @OneToMany(() => Applications, (application) => application.job)
+    applications: Applications[];
 
 }

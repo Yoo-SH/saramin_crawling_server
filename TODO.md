@@ -1,5 +1,5 @@
 # 할일 
-
+job entity로 왜 연결 user entity가 
 
 - user와 applications 관계 (1:N 관계)
 
