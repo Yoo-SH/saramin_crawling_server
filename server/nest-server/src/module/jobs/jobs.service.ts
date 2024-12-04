@@ -4,6 +4,7 @@ import { Not, Repository } from 'typeorm';
 import { Jobs } from './entity/jobs.entity';
 import { GetJobsDto } from './dto/get-jobs.dto';
 import { NotFoundException } from '@nestjs/common';
+import { CreateJobsDto } from './dto/create-jobs.dto';
 
 @Injectable()
 export class JobsService {
@@ -94,4 +95,41 @@ export class JobsService {
             throw new InternalServerErrorException('공고 상세 조회 중 서버에서 에러가 발생했습니다.');
         }
     }
+
+    async createJob(createJobsDto: CreateJobsDto) {
+        const {
+            company,
+            title,
+            link,
+            location,
+            experience,
+            education,
+            employment_type,
+            deadline,
+            sector,
+            salary
+
+        } = createJobsDto;
+
+        try {
+            const job = new Jobs();
+            job.company = company;
+            job.title = title;
+            job.link = link;
+            job.location = location;
+            job.experience = experience;
+            job.education = education;
+            job.employment_type = employment_type;
+            job.deadline = deadline;
+            job.sector = sector;
+            job.salary = salary;
+
+            await this.repo_jobs.save(job);
+
+            return { messeges: '성공', data: job, statusCode: 200 };
+        } catch (error) {
+            return { messeges: '실패', data: error, statusCode: 400 };
+        }
+    }
+
 }
