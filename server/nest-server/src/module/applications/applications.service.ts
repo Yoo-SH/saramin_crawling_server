@@ -102,4 +102,31 @@ export class ApplicationsService {
             throw new InternalServerErrorException('지원 목록 조회 중 서버에서 오류가 발생했습니다.');
         }
     }
+
+    async deleteApplication(user_id, application_id: number) {
+        try {
+            const application = await this.repo_applications.findOne({
+                where: { id: application_id, user: { id: user_id } },
+                relations: ['user', 'job']
+            });
+
+            if (!application) {
+                throw new NotFoundException('해당 지원 정보가 존재하지 않습니다.');
+            }
+
+            await this.repo_applications.remove(application);
+
+            return {
+                message: '지원 정보가 삭제되었습니다.',
+                data: application,
+                status: 200,
+            };
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            console.log(error);
+            throw new InternalServerErrorException('지원 정보 삭제 중 서버에서 오류가 발생했습니다.');
+        }
+    }
 }
