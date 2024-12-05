@@ -25,9 +25,16 @@ export class PerformanceLoggingInterceptor implements NestInterceptor {
                 const endTime = Date.now(); // 응답이 끝난 시간 기록
                 const responseTime = endTime - startTime; // 총 소요 시간 계산
 
-                this.logger.log(
-                    `Outgoing Response: [${method}] ${url} - Response Time: ${responseTime}ms`,
-                );
+
+                if (responseTime > 500) {
+                    this.logger.warn(
+                        `Slow Response Detected: [${method}] ${url} - Response Time: ${responseTime}ms`,
+                    );
+                } else {
+                    this.logger.log(
+                        `Outgoing Response: [${method}] ${url} - Response Time: ${responseTime}ms`,
+                    );
+                }
             }),
         );
     }
