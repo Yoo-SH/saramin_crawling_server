@@ -128,7 +128,7 @@ export class JobsService {
 
             return { messeges: '성공', data: job, statusCode: 200 };
         } catch (error) {
-            return { messeges: '실패', data: error, statusCode: 400 };
+            return new InternalServerErrorException('공고 등록 중 서버에서 에러가 발생했습니다.');
         }
     }
 

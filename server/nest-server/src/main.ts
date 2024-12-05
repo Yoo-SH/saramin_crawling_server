@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './config/app.module';
 import * as cookieParser from 'cookie-parser';
+import { HttpExceptionFilter } from './common/exception-filter/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,10 @@ async function bootstrap() {
       credentials: true, //쿠키 전송 허용
     }
   )
+  0
+  // 글로벌 필터 등록
+  app.useGlobalFilters(new HttpExceptionFilter());
+
 
   await app.listen(process.env.PORT ?? 3000);
 }
