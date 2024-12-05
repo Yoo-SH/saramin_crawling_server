@@ -5,11 +5,15 @@ import { AppModule } from './config/app.module';
 import * as cookieParser from 'cookie-parser';
 import { BadRequestException } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/exception-filter/http-exception.filter';
-
+import { PerformanceLoggingInterceptor } from './common/interceptor/performance-logging.interceptor';
+import { Logger } from '@nestjs/common';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'], // 모든 로그 레벨 활성화
+  });
+
   app.useGlobalPipes(new ValidationPipe({
-    // 1. whitelist: 요청에서 DTO에 없는 속성을 자동으로 제거합니다.(forbidNonWhitelisted 이나 둘 중 하나만 사용해도 됨.)
+    // 1. whitelist: 요청에서 DTO에 없는 속성을 자동으로 제거합니다.(forbidNonWhitelisted 이나 둘 중 하나만 사용해도.)
     whitelist: true,
 
     // 2. forbidNonWhitelisted: 요청에 DTO에 없는 속성이 있을 경우 요청을 거부합니다.
@@ -61,11 +65,15 @@ async function bootstrap() {
       credentials: true, //쿠키 전송 허용
     }
   )
-  0
-  // 글로벌 필터 등록
+
+  // 성능 모니터링 인터셉터 등록
+  app.useGlobalInterceptors(new PerformanceLoggingInterceptor());
+
+  // 글로벌 예러 핸들러 필터 등록
   app.useGlobalFilters(new HttpExceptionFilter());
 
 
   await app.listen(process.env.PORT ?? 3000);
+  Logger.log(`Server running on http://localhost:${process.env.PORT ?? 3000}`, 'Bootstrap');
 }
 bootstrap();
