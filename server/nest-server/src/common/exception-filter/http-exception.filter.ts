@@ -5,12 +5,15 @@ import {
     ArgumentsHost,     // ArgumentsHost는 핸들러에 전달된 인수를 캡슐화합니다.
     HttpException,     // HttpException은 기본 HTTP 예외 처리를 위한 NestJS 클래스입니다.
     HttpStatus,        // HttpStatus는 HTTP 상태 코드를 정의한 열거형(Enum)입니다.
+    Logger,            // Logger는 로깅을 위한 NestJS 클래스입니다.
 } from '@nestjs/common';
 import { Request, Response } from 'express'; // Express의 Request와 Response 객체를 사용하기 위해 임포트합니다.
 
 // @Catch() 데코레이터는 모든 예외를 잡겠다고 명시합니다.
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+    private readonly logger = new Logger(HttpExceptionFilter.name); // Logger 인스턴스를 생성합니다.
+
     // ExceptionFilter 인터페이스의 catch 메서드를 구현합니다.
     catch(exception: unknown, host: ArgumentsHost) {
         // 현재 처리하고 있는 HTTP 요청/응답을 얻기 위해 host 객체에서 HTTP 관련 컨텍스트를 가져옵니다.
@@ -36,6 +39,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             message = 'Internal server error';
         }
+        // 요청 정보와 함께 에러 로그 출력
+        this.logger.error(
+            `message: ${message}, HTTP statusCode: ${status},  method: ${request.method}, url: ${request.url}`,
+        );
+
 
         // 클라이언트에게 JSON 형식으로 에러 응답을 보냅니다.
         response.status(status).json({
