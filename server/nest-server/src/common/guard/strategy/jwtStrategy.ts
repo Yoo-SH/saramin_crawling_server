@@ -3,8 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/module/users/users.service';
+import { CustomTokenUnauthorizedException } from '../../exception-filter/custom-token-unAuthorized.exception';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -24,6 +24,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     //토큰이 유효하면 호출됨: JWT 토큰이 만료되지 않았고 서명 검증에 성공하면 validate() 메서드가 호출됩니다.
     //예를 들어, JWT가 유효하다고 해서 무조건 그 사용자가 서버에 실제 존재하는 유효한 사용자라는 보장이 있는 것은 아닙니다. 따라서 validate() 메서드에서 추가적으로 데이터베이스에서 사용자를 조회하여 존재 여부를 확인할 수 있습니다.
     async validate(payload: any) {
+
+        if (payload == null) { // payload에 user_id가 없으면 토큰이 유효하지 않다고 판단
+            throw new CustomTokenUnauthorizedException();
+        }
+
+
         try {
             const user = await this.usersService.findUsersById(payload.user_id); // 사용자 ID로 사용자 조회, 여기서 user_id 가 db에서 존재하는지 예외처리함.
             // req.user: validate()에서 반환된 객체는 req.user에 할당되어, 이후 요청을 처리하는 곳에서 사용될 수 있습니다.
