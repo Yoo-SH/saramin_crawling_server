@@ -132,4 +132,22 @@ export class JobsService {
         }
     }
 
+    async updateJob(job_id: number, updateJobsDto: any) {
+        try {
+            const job = await this.repo_jobs.findOne({ where: { id: job_id } });
+            if (!job) {
+                throw new NotFoundException('해당 공고가 없습니다.');
+            }
+
+            await this.repo_jobs.update(job_id, updateJobsDto);
+
+            return { messeges: '성공', data: job, statusCode: 200 };
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('공고 수정 중 서버에서 에러가 발생했습니다.');
+        }
+    }
+
 }
