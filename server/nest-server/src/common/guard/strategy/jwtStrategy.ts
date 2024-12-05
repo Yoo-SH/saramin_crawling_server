@@ -4,7 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from 'src/module/users/users.service';
-import { CustomTokenUnauthorizedException } from '../exception-filter/custom-token-unAuthorized.exception';
+import { CustomTokenUnauthorizedException } from '../../exception-filter/custom-token-unAuthorized.exception';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
