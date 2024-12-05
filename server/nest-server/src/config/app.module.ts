@@ -10,6 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { BookmarksModule } from 'src/module/bookmarks/bookmarks.module';
 import { ApplicationsModule } from 'src/module/applications/applications.module';
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({

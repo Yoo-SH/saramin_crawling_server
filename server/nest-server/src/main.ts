@@ -7,10 +7,18 @@ import { BadRequestException } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/exception-filter/http-exception.filter';
 import { PerformanceLoggingInterceptor } from './common/interceptor/performance-logging.interceptor';
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'error', 'warn', 'debug', 'verbose'], // 모든 로그 레벨 활성화
-  });
+
+
+  const app = await NestFactory.create(AppModule,);
+
+  // 로그 레벨을 환경 변수에서 가져와서 설정
+  const configService = app.get(ConfigService);
+  const logLevels = configService.get<string>('LOG_LEVEL').split(',');
+  app.useLogger(logLevels as any); // useLogger의 타입과 맞추기 위해 any로 캐스팅
+
+
 
   app.useGlobalPipes(new ValidationPipe({
     // 1. whitelist: 요청에서 DTO에 없는 속성을 자동으로 제거합니다.(forbidNonWhitelisted 이나 둘 중 하나만 사용해도.)
