@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query, Body, Put } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, Body, Put, Delete } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { GetJobsDto } from './dto/get-jobs.dto';
 import { UseGuards } from '@nestjs/common';
@@ -29,6 +29,12 @@ export class JobsController {
     @Put(':id')
     async updateJob(@Param('id') id: number, @Body() UpdateJobsDto: UpdateJobsDto) {
         return await this.jobsService.updateJob(id, UpdateJobsDto);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete(':id')
+    async deleteJob(@Param('id') id: number) {
+        return await this.jobsService.deleteJob(id);
     }
 
 }
