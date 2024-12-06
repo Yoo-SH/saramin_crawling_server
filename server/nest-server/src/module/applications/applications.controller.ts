@@ -1,9 +1,11 @@
 import { Controller, Post, UseGuards, Req, Body, Get, Query, Delete, Param } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
-import { CreateApplicationsDto } from './dto/create-applications.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
-
+import { CreateApplicationsDto } from './dto/request/create-applications.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ResponsePostApplicationsDto } from './dto/response/response-post-applications.dto';
+import { ResponseGetApplicationsDto } from './dto/response/response-get-applications.dto';
+import { ResponseDeleteApplicationsDto } from './dto/response/response-delete-applications.dto';
 @ApiTags('applications')
 @Controller('applications')
 export class ApplicationsController {
@@ -12,6 +14,7 @@ export class ApplicationsController {
     ) { }
 
     @ApiOperation({ summary: '지원서 작성' })
+    @ApiResponse({ status: 201, description: '지원이 완료되었습니다.', type: ResponsePostApplicationsDto })
     @UseGuards(JwtAuthGuard)
     @Post()
     async createApplication(@Req() req, @Body() body: CreateApplicationsDto) {
@@ -19,6 +22,7 @@ export class ApplicationsController {
     }
 
     @ApiOperation({ summary: '지원서 조회' })
+    @ApiResponse({ status: 200, description: '지원 목록 조회가 완료되었습니다.', type: ResponseGetApplicationsDto })
     @Get()
     async getApplications(
         @Query('user_id') user_id?: number,
@@ -30,6 +34,7 @@ export class ApplicationsController {
     }
 
     @ApiOperation({ summary: '지원서 삭제' })
+    @ApiResponse({ status: 200, description: '지원 정보가 삭제되었습니다.', type: ResponseDeleteApplicationsDto })
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
     async deleteApplication(@Req() req, @Param('id') application_id: number) {
