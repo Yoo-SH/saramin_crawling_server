@@ -8,6 +8,7 @@ import { HttpExceptionFilter } from './common/exception-filter/http-exception.fi
 import { PerformanceLoggingInterceptor } from './common/interceptor/performance-logging.interceptor';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
 
 
@@ -18,6 +19,16 @@ async function bootstrap() {
   const logLevels = configService.get<string>('LOG_LEVEL').split(',');
   app.useLogger(logLevels as any); // useLogger의 타입과 맞추기 위해 any로 캐스팅
 
+  // Swagger 설정
+  const config = new DocumentBuilder()
+    .setTitle('SARAMIN SERVER API')
+    .setDescription('NestJS를 이용한 SARAMIN SERVER API 문서입니다.')
+    .setVersion('1.0')
+    .addCookieAuth('connect.sid')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
 
   app.useGlobalPipes(new ValidationPipe({
@@ -74,11 +85,11 @@ async function bootstrap() {
     }
   )
 
-  // 성능 모니터링 인터셉터 등록
-  app.useGlobalInterceptors(new PerformanceLoggingInterceptor());
 
   // 글로벌 예러 핸들러 필터 등록
   app.useGlobalFilters(new HttpExceptionFilter());
+  // 성능 모니터링 인터셉터 등록
+  app.useGlobalInterceptors(new PerformanceLoggingInterceptor());
 
 
   await app.listen(process.env.PORT ?? 3000);
