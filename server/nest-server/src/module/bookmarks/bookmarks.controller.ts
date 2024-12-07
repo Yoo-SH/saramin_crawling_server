@@ -2,7 +2,7 @@ import { Controller, Post, Get, UseGuards, Req, Body } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
 import { CreateBookmarkDto } from './dto/request/create-bookmarks.dto';
 import { BookmarksService } from './bookmarks.service';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { ResponseGetBookmarksDto } from './dto/response/response-get-bookmarks.dto';
 import { ResponsePostBookmarksDto } from './dto/response/response-post-bookmarks.dto';
 import { ErrorResponseDto } from 'src/common/dto/error-response.dto';
@@ -16,6 +16,7 @@ export class BookmarksController {
     @ApiResponse({ status: 201, description: '북마크가 되었습니다', type: ResponsePostBookmarksDto })
     @ApiResponse({ status: 201, description: '북마크가 해제되었습니다.', type: ResponsePostBookmarksDto })
     @ApiResponse({ status: 500, description: '북마크 토글과정 중 서버에서 에러가 발생했습니다.', type: ErrorResponseDto })
+    @ApiSecurity('cookieAuth')
     @UseGuards(JwtAuthGuard)
     @Post()
     async createBookmarkToggle(@Req() req, @Body() body: CreateBookmarkDto) {

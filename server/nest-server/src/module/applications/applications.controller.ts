@@ -2,7 +2,7 @@ import { Controller, Post, UseGuards, Req, Body, Get, Query, Delete, Param } fro
 import { ApplicationsService } from './applications.service';
 import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
 import { CreateApplicationsDto } from './dto/request/create-applications.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { ResponsePostApplicationsDto } from './dto/response/response-post-applications.dto';
 import { ResponseGetApplicationsDto } from './dto/response/response-get-applications.dto';
 import { ResponseDeleteApplicationsDto } from './dto/response/response-delete-applications.dto';
@@ -18,6 +18,7 @@ export class ApplicationsController {
     @ApiResponse({ status: 201, description: '지원이 완료되었습니다.', type: ResponsePostApplicationsDto })
     @ApiResponse({ status: 409, description: '이미 지원한 공고입니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '지원 중 서버에서 오류가 발생했습니다.', type: ErrorResponseDto })
+    @ApiSecurity('cookieAuth')
     @UseGuards(JwtAuthGuard)
     @Post()
     async createApplication(@Req() req, @Body() body: CreateApplicationsDto) {
@@ -42,6 +43,7 @@ export class ApplicationsController {
     @ApiResponse({ status: 200, description: '지원 정보가 삭제되었습니다.', type: ResponseDeleteApplicationsDto })
     @ApiResponse({ status: 404, description: '해당 지원 정보가 존재하지 않습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '지원 정보 삭제 중 서버에서 오류가 발생했습니다.', type: ErrorResponseDto })
+    @ApiSecurity('cookieAuth')
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
     async deleteApplication(@Req() req, @Param('id') application_id: number) {

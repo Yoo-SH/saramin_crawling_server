@@ -7,7 +7,7 @@ import { Response, Request } from 'express';
 import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
 import { UpdateProfileDto } from './dto/request/update-profile.dto';
 import { DeleteUserDto } from './dto/request/delete-user.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { ResponsePostAuthRegisterDto } from './dto/response/response-post-auth-register.dto';
 import { ResponsePostAuthLoginDto } from './dto/response/response-post-auth-login.dto';
 import { ResponsePostAuthRefreshDto } from './dto/response/response-post-auth-refresh.dto';
@@ -44,6 +44,7 @@ export class AuthController {
     @ApiOperation({ summary: '로그아웃' })
     @ApiResponse({ status: 200, description: '로그아웃 되었습니다.', type: ResponsePostAuthLogoutDto })
     @ApiResponse({ status: 500, description: '로그아웃 중 오류가 발생했습니다.', type: ErrorResponseDto })
+    @ApiSecurity('cookieAuth')
     @UseGuards(JwtAuthGuard)
     @Post('logout')
     async logout(@Req() req, @Res() res: Response) {
@@ -69,6 +70,7 @@ export class AuthController {
     @ApiResponse({ status: 409, description: '이미 사용 중인 이름입니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 401, description: '비밀번호가 일치하지 않습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '프로필 수정 중 오류가 발생했습니다.', type: ErrorResponseDto })
+    @ApiSecurity('cookieAuth')
     @UseGuards(JwtAuthGuard)
     @Put('profile')
     updateProfile(@Req() req, @Body() body: UpdateProfileDto) {
@@ -81,6 +83,7 @@ export class AuthController {
     @ApiResponse({ status: 404, description: '인증 정보를 찾을 수 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 401, description: '비밀번호가 일치하지 않습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '회원 탈퇴 중 오류가 발생했습니다.', type: ErrorResponseDto })
+    @ApiSecurity('cookieAuth')
     @UseGuards(JwtAuthGuard)
     @Delete('profile')
     deleteUser(@Req() req, @Body() body: DeleteUserDto) {

@@ -24,7 +24,14 @@ async function bootstrap() {
     .setTitle('SARAMIN SERVER API')
     .setDescription('NestJS를 이용한 SARAMIN SERVER API 문서입니다.')
     .setVersion('1.0')
-    .addCookieAuth('connect.sid')
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'access_token', // 쿠키 이름
+        in: 'cookie', // 쿠키에서 읽는다는 것을 명시
+      },
+      'cookieAuth', // 인증 스키마 이름
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
