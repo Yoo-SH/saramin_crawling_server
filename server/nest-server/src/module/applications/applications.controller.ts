@@ -6,6 +6,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ResponsePostApplicationsDto } from './dto/response/response-post-applications.dto';
 import { ResponseGetApplicationsDto } from './dto/response/response-get-applications.dto';
 import { ResponseDeleteApplicationsDto } from './dto/response/response-delete-applications.dto';
+import { ErrorResponseDto } from 'src/common/dto/error-response.dto';
 @ApiTags('applications')
 @Controller('applications')
 export class ApplicationsController {
@@ -15,6 +16,8 @@ export class ApplicationsController {
 
     @ApiOperation({ summary: '지원서 작성' })
     @ApiResponse({ status: 201, description: '지원이 완료되었습니다.', type: ResponsePostApplicationsDto })
+    @ApiResponse({ status: 409, description: '이미 지원한 공고입니다.', type: ErrorResponseDto })
+    @ApiResponse({ status: 500, description: '지원 중 서버에서 오류가 발생했습니다.', type: ErrorResponseDto })
     @UseGuards(JwtAuthGuard)
     @Post()
     async createApplication(@Req() req, @Body() body: CreateApplicationsDto) {
@@ -23,6 +26,8 @@ export class ApplicationsController {
 
     @ApiOperation({ summary: '지원서 조회' })
     @ApiResponse({ status: 200, description: '지원 목록 조회가 완료되었습니다.', type: ResponseGetApplicationsDto })
+    @ApiResponse({ status: 404, description: '조회된 지원 목록이 없습니다.', type: ErrorResponseDto })
+    @ApiResponse({ status: 500, description: '지원 목록 조회 중 서버에서 오류가 발생했습니다.', type: ErrorResponseDto })
     @Get()
     async getApplications(
         @Query('user_id') user_id?: number,
@@ -35,6 +40,8 @@ export class ApplicationsController {
 
     @ApiOperation({ summary: '지원서 삭제' })
     @ApiResponse({ status: 200, description: '지원 정보가 삭제되었습니다.', type: ResponseDeleteApplicationsDto })
+    @ApiResponse({ status: 404, description: '해당 지원 정보가 존재하지 않습니다.', type: ErrorResponseDto })
+    @ApiResponse({ status: 500, description: '지원 정보 삭제 중 서버에서 오류가 발생했습니다.', type: ErrorResponseDto })
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
     async deleteApplication(@Req() req, @Param('id') application_id: number) {
