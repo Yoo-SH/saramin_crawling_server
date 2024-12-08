@@ -1,53 +1,103 @@
 # 할일 
-job entity로 왜 연결 user entity가 
-
-- user와 applications 관계 (1:N 관계)
-
-사용자는 여러 구인 공고에 지원할 수 있습니다. 즉, 한 사용자는 여러 applications 항목을 가질 수 있지만, 각 지원 항목은 한 명의 사용자와만 연결됩니다.
-Foreign Key를 applications 테이블에 user_id로 추가합니다.
-
-- jobs와 applications 관계 (1:N 관계)
-
-각 구인 공고(jobs)는 여러 명의 사용자가 지원할 수 있습니다. 따라서 각 applications 항목은 특정 jobs 항목과 연결됩니다.
-Foreign Key를 applications 테이블에 job_id로 추가합니다.
-
-- user와 bookmarks 관계 (1:N 관계)
-
-사용자는 여러 구인 공고를 북마크할 수 있습니다. 즉, 한 사용자는 여러 bookmarks 항목을 가질 수 있지만, 각 북마크는 한 명의 사용자와만 연결됩니다.
-Foreign Key를 bookmarks 테이블에 user_id로 추가합니다.
-
-- jobs와 bookmarks 관계 (1:N 관계)
-
-각 구인 공고(jobs)는 여러 사용자에게 북마크될 수 있습니다. 따라서 각 bookmarks 항목은 특정 jobs 항목과 연결됩니다.
-Foreign Key를 bookmarks 테이블에 job_id로 추가합니다.
+0. 에러 응답 반응 공통으로 모아두고 호출하기
+1. swagger api 성공 반응 -> 서비스에서 응답 메시지 수정(status) + statusCode 안 맞는 것도 수정 특히 201
+2. swagger api 실패 반응
+3. 회원 탈퇴시, bookmark도 연결되어 있어서 그 내용도 트랜젝션으로 제거해야함. bookmark 테이블에서 참조 중임.
 
 
-# DB 구현 모델
-## 채용공고 정보
-## 회사 정보 
-## 지원 내역
-## 북마크/관심 공고 모델
-## 연봉 정보
-## 업종 정보
-## 근무형태 정보
+## company entity와 연결 할 경우
 
-# 필수 수집 정보 
-## 지역별
-## 경력별
-## 기술스택별
-## 회사명
-## 포지션
-## 공고 상세 조회
-## 공고 조회수(증가)
-## 관련 공고 추천
-## 날짜
+import requests
+from bs4 import BeautifulSoup
+import psycopg2
 
+# PostgreSQL 연결 설정
+DB_HOST = "localhost"
+DB_NAME = "your_database_name"
+DB_USER = "your_username"
+DB_PASSWORD = "your_password"
 
+def crawl_jobs():
+    # 예시: 직업 데이터를 크롤링하는 함수
+    url = 'https://example.com/jobs'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # 필요한 데이터 파싱 (예: 회사명, 제목, 링크 등)
+    jobs_data = []
+    for job_element in soup.find_all('div', class_='job'):
+        company = job_element.find('span', class_='company').text.strip()
+        title = job_element.find('h2').text.strip()
+        jobs_data.append({'company': company, 'title': title})
+    
+    return jobs_data
 
-# API
-## 채용공고- 조회, 검색, 필터링, 정렬, 등록, 수정, 삭제
-## 회원 관리 - 회원가입, 로그인, 조회,  회원탈퇴
-## 지원하기- 지원하기, 관심등록, 지원취소, 지원 내역 조회
-## MORE
-## MORE
-## MORE
+def save_jobs_to_db(jobs):
+    try:
+        # PostgreSQL 연결
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        cursor = conn.cursor()
+
+        # Step 1: Company 테이블 생성 (존재하지 않는 경우)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS company (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) UNIQUE NOT NULL
+            );
+        """)
+
+        # Step 2: Jobs 테이블에 company_id 컬럼 추가 (존재하지 않는 경우)
+        cursor.execute("""
+            ALTER TABLE IF EXISTS jobs ADD COLUMN IF NOT EXISTS company_id INTEGER;
+        """)
+
+        # Step 3: 중복되지 않는 Company 이름들을 테이블에 삽입
+        for job in jobs:
+            cursor.execute("""
+                INSERT INTO company (name)
+                VALUES (%s)
+                ON CONFLICT (name) DO NOTHING;
+            """, (job['company'],))
+
+        # Step 4: Jobs 테이블에 데이터 삽입 및 company_id 매핑
+        for job in jobs:
+            # Company ID 가져오기
+            cursor.execute("""
+                SELECT id FROM company WHERE name = %s;
+            """, (job['company'],))
+            company_id = cursor.fetchone()[0]
+
+            # Jobs 테이블에 데이터 삽입
+            cursor.execute("""
+                INSERT INTO jobs (title, company_id)
+                VALUES (%s, %s);
+            """, (job['title'], company_id))
+
+        # Step 5: 외래 키 제약 추가 (존재하지 않는 경우)
+        cursor.execute("""
+            ALTER TABLE jobs
+            ADD CONSTRAINT IF NOT EXISTS fk_company
+            FOREIGN KEY (company_id)
+            REFERENCES company(id);
+        """)
+
+        # 변경 사항 커밋 및 연결 종료
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print("Jobs data has been successfully migrated and saved.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    # Step 1: Job 데이터 크롤링
+    jobs = crawl_jobs()
+
+    # Step 2: 크롤링한 데이터를 데이터베이스에 저장 및 마이그레이션
+    save_jobs_to_db(jobs)

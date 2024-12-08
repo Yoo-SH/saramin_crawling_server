@@ -19,24 +19,28 @@ async function bootstrap() {
   const logLevels = configService.get<string>('LOG_LEVEL').split(',');
   app.useLogger(logLevels as any); // useLogger의 타입과 맞추기 위해 any로 캐스팅
 
-  // Swagger 설정
-  const config = new DocumentBuilder()
-    .setTitle('SARAMIN SERVER API')
-    .setDescription('NestJS를 이용한 SARAMIN SERVER API 문서입니다.')
-    .setVersion('1.0')
-    .addApiKey(
-      {
-        type: 'apiKey',
-        name: 'access_token', // 쿠키 이름
-        in: 'cookie', // 쿠키에서 읽는다는 것을 명시
-      },
-      'cookieAuth', // 인증 스키마 이름
-    )
-    .build();
+  const swaggerEnabled = configService.get<boolean>('SWAGGER_ENABLED');
+  if (swaggerEnabled) {
+    const swaggerPath = configService.get<string>('SWAGGER_PATH');
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+    // Swagger 설정
+    const config = new DocumentBuilder()
+      .setTitle('SARAMIN SERVER API')
+      .setDescription('NestJS를 이용한 SARAMIN SERVER API 문서입니다.')
+      .setVersion('1.0')
+      .addApiKey(
+        {
+          type: 'apiKey',
+          name: 'access_token', // 쿠키 이름
+          in: 'cookie', // 쿠키에서 읽는다는 것을 명시
+        },
+        'cookieAuth', // 인증 스키마 이름
+      )
+      .build();
 
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup(swaggerPath, app, document);
+  }
 
   app.useGlobalPipes(new ValidationPipe({
     // 1. whitelist: 요청에서 DTO에 없는 속성을 자동으로 제거합니다.(forbidNonWhitelisted 이나 둘 중 하나만 사용해도.)
@@ -88,6 +92,8 @@ async function bootstrap() {
   app.enableCors(
     {
       origin: true, //모든 도메인 허용, 나중에는 allupkorea 이라는 도메인만 허용하도록 변경
+      methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true, //쿠키 전송 허용
     }
   )
@@ -99,7 +105,9 @@ async function bootstrap() {
   app.useGlobalInterceptors(new PerformanceLoggingInterceptor());
 
 
-  await app.listen(process.env.PORT ?? 3000);
-  Logger.log(`Server running on http://localhost:${process.env.PORT ?? 3000}`, 'Bootstrap');
+  await app.listen(configService.get<number>('PORT') ?? 3000);
+  Logger.log(`Server running on http://localhost:${configService.get<number>('PORT') ?? 3000}`, 'Bootstrap');
+  console.log(`Server running on http://localhost:${configService.get<number>('PORT') ?? 3000}`);
+
 }
 bootstrap();
