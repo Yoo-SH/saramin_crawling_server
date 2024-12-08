@@ -53,7 +53,7 @@ export class BookmarksService {
                 if (!acc[userId]) {
                     acc[userId] = {
                         user: bookmark.user,
-                        bookmarks: [],
+                        bookmark_job: [],
                     };
                 }
                 acc[userId].bookmarks.push(bookmark.job);

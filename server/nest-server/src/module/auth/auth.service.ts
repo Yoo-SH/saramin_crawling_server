@@ -2,16 +2,16 @@ import { Injectable, HttpException, HttpStatus, ConflictException, NotFoundExcep
 import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryRunner, DataSource, In } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { CreateLoginDto } from './dto/create-login.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { CreateUserDto } from './dto/request/create-user.dto';
+import { CreateLoginDto } from './dto/request/create-login.dto';
+import { UpdateProfileDto } from './dto/request/update-profile.dto';
 import { Users } from '../users/entity/users.entity';
 import { Auth } from './entity/auth.entity';
 import * as bcrypt from 'bcrypt'; // Add this line to fix the type error
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { CreateRefreshDto } from './dto/create-refresh.dto';
-import { DeleteUserDto } from './dto/delete-user.dto';
+import { CreateRefreshDto } from './dto/request/create-refresh.dto';
+import { DeleteUserDto } from './dto/request/delete-user.dto';
 import { Response } from 'express';
 
 interface Token {
@@ -300,6 +300,10 @@ export class AuthService {
             };
 
         } catch (error) {
+            if (error instanceof UnauthorizedException || error instanceof NotFoundException || error instanceof ConflictException) {
+                throw error;
+            }
+
             throw new InternalServerErrorException('프로필 수정 중 오류가 발생했습니다.');
         }
     }

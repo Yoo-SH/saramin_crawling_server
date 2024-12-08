@@ -2,9 +2,9 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { Jobs } from './entity/jobs.entity';
-import { GetJobsDto } from './dto/get-jobs.dto';
+import { GetJobsDto } from './dto/request/get-jobs.dto';
 import { NotFoundException } from '@nestjs/common';
-import { CreateJobsDto } from './dto/create-jobs.dto';
+import { CreateJobsDto } from './dto/request/create-jobs.dto';
 
 @Injectable()
 export class JobsService {

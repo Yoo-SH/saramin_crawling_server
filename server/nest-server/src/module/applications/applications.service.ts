@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Applications } from './entity/applications.entity';
-import { CreateApplicationsDto } from './dto/create-applications.dto';
+import { CreateApplicationsDto } from './dto/request/create-applications.dto';
 import { InternalServerErrorException } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common';
 
