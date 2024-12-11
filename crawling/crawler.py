@@ -1,9 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-from datetime import datetime
-import time
 from sqlalchemy import create_engine
+import time
 
 
 def crawl_saramin(keyword, pages=1):
@@ -17,63 +16,54 @@ def crawl_saramin(keyword, pages=1):
     Returns:
         DataFrame: 채용공고 정보가 담긴 데이터프레임
     """
-
     jobs = []
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+
     }
 
     for page in range(1, pages + 1):
         url = f"https://www.saramin.co.kr/zf_user/search/recruit?searchType=search&searchword={keyword}&recruitPage={page}"
+        print(f"Fetching page {page}: {url}")
 
         try:
-            response = requests.get(url, headers=headers)
+            # 네트워크 요청
+            response = requests.get(url, headers=headers, timeout=30)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, "html.parser")
-            # print(soup)
-            # exit()
 
             # 채용공고 목록 가져오기
             job_listings = soup.select(".item_recruit")
+            print(f"Found {len(job_listings)} job listings on page {page}")
 
             for job in job_listings:
                 try:
-                    # 회사명 - 수정된 부분
-                    company = job.select_one(".corp_name a").text.strip()
+                    # 채용 정보 파싱
+                    company = job.select_one(".corp_name a")
+                    company = company.text.strip() if company else "N/A"
 
-                    # 채용 제목
-                    title = job.select_one(".job_tit a").text.strip()
+                    title = job.select_one(".job_tit a")
+                    title = title.text.strip() if title else "N/A"
 
-                    # 채용 링크
-                    link = (
-                        "https://www.saramin.co.kr"
-                        + job.select_one(".job_tit a")["href"]
-                    )
+                    link = job.select_one(".job_tit a")
+                    link = "https://www.saramin.co.kr" + link["href"] if link else "N/A"
 
-                    # 지역, 경력, 학력, 고용형태
                     conditions = job.select(".job_condition span")
-                    location = conditions[0].text.strip() if len(conditions) > 0 else ""
-                    experience = (
-                        conditions[1].text.strip() if len(conditions) > 1 else ""
-                    )
-                    education = (
-                        conditions[2].text.strip() if len(conditions) > 2 else ""
-                    )
-                    employment_type = (
-                        conditions[3].text.strip() if len(conditions) > 3 else ""
-                    )
+                    location = conditions[0].text.strip() if len(conditions) > 0 else "N/A"
+                    experience = conditions[1].text.strip() if len(conditions) > 1 else "N/A"
+                    education = conditions[2].text.strip() if len(conditions) > 2 else "N/A"
+                    employment_type = conditions[3].text.strip() if len(conditions) > 3 else "N/A"
 
-                    # 마감일
-                    deadline = job.select_one(".job_date .date").text.strip()
+                    deadline = job.select_one(".job_date .date")
+                    deadline = deadline.text.strip() if deadline else "N/A"
 
-                    # 직무 분야
                     job_sector = job.select_one(".job_sector")
-                    sector = job_sector.text.strip() if job_sector else ""
+                    sector = job_sector.text.strip() if job_sector else "N/A"
 
-                    # 평균연봉 정보 (있는 경우)
                     salary_badge = job.select_one(".area_badge .badge")
-                    salary = salary_badge.text.strip() if salary_badge else ""
+                    salary = salary_badge.text.strip() if salary_badge else "N/A"
 
+                    # 결과 추가
                     jobs.append(
                         {
                             "company": company,
@@ -88,19 +78,18 @@ def crawl_saramin(keyword, pages=1):
                             "salary": salary,
                         }
                     )
-
-                    # print(jobs[-1])
-                    # exit()
-
-                except AttributeError as e:
-                    print(f"항목 파싱 중 에러 발생: {e}")
+                except Exception as e:
+                    print(f"Error parsing job details: {e}")
                     continue
 
-            print(f"{page}페이지 크롤링 완료")
-            time.sleep(1)  # 서버 부하 방지를 위한 딜레이
+            print(f"Page {page} completed")
+            time.sleep(1)  # 딜레이 추가
 
         except requests.RequestException as e:
-            print(f"페이지 요청 중 에러 발생: {e}")
-            continue
+            print(f"Error fetching page {page}: {e}")
+            break
 
+    # DataFrame으로 반환
     return pd.DataFrame(jobs)
+
+
