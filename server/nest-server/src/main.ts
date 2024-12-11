@@ -1,4 +1,5 @@
 
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './config/app.module';
@@ -105,7 +106,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new PerformanceLoggingInterceptor());
 
 
-  await app.listen(configService.get<number>('PORT') ?? 3000);
+  await app.listen(configService.get<number>('PORT') ?? 3000,'0.0.0.0');
   Logger.log(`Server running on http://localhost:${configService.get<number>('PORT') ?? 3000}`, 'Bootstrap');
   console.log(`Server running on http://localhost:${configService.get<number>('PORT') ?? 3000}`);
 
