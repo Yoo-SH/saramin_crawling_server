@@ -2,8 +2,7 @@ import { ConflictException, Injectable, InternalServerErrorException } from '@ne
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from './entity/company.entity';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import internal from 'stream';
+import { CreateCompanyDto } from './dto/request/create-company.dto';
 
 @Injectable()
 export class CompanyService {

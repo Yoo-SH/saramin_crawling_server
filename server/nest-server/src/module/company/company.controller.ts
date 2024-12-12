@@ -1,5 +1,5 @@
 import { Controller, Body, Post } from '@nestjs/common';
-import { CreateCompanyDto } from './dto/create-company.dto';
+import { CreateCompanyDto } from './dto/request/create-company.dto';
 import { CompanyService } from './company.service';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { ResponsePostCompanyDto } from './dto/response/response-post-company.dto';

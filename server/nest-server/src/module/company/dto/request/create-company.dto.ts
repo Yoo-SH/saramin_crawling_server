@@ -2,7 +2,7 @@ import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCompanyDto {
-    @ApiProperty({ example: 5 })
+    @ApiProperty({ example: 1 })
     @IsNumber()
     @IsNotEmpty({ message: '회사 ID는 필수 입력 값입니다.' })
     readonly company_id: number;
