@@ -6,8 +6,6 @@ from sqlalchemy import create_engine
 
 # .env 파일에서 환경 변수 로드
 load_dotenv()
-
-# 사용 예시
 if __name__ == "__main__":
     keyword = input("검색할 키워드를 입력하세요: ")
     pages = input("크롤링할 페이지 수를 입력하세요 (기본값: 1): ")
@@ -19,17 +17,22 @@ if __name__ == "__main__":
         df = crawl_saramin(keyword, pages)
         print(df)
 
-        # postgresql 연결
+        # PostgreSQL 연결
         engine = create_engine(
             f"postgresql://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_DATABASE')}",
             connect_args={"client_encoding": "utf8"},
         )
 
         with engine.connect() as connection:
-            print("연결 성공")
-            # PostgreSQL 데이터베이스에 연결하여 크롤링한 데이터를 "jobs" 테이블에 저장합니다.
+            print("DB 연결 성공")
+
+            # 전체 데이터 저장
             df.to_sql("jobs", engine, if_exists="append", index=False)
+            print("jobs 데이터 저장 완료")
+
+            # company 열만 추출 후 name 열로 변경
+            company_df = df[["company"]].rename(columns={"company": "name"})
+            company_df.to_sql("company", engine, if_exists="append", index=False)
+            print("company 데이터 저장 완료")
     except Exception as e:
         print("에러 발생:", e)
-
-
