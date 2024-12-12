@@ -52,7 +52,7 @@ export class AuthController {
     }
 
 
-    @ApiOperation({ summary: '토큰 갱신' })
+    @ApiOperation({ summary: '토큰 갱신' }) // 401 응답 시 /auth/refresh 엔드포인트를 통해 새 Access Token을 요청하도록 클라이언트 측에서 처리
     @ApiResponse({ status: 200, description: '토큰이 갱신 되었습니다.', type: ResponsePostAuthRefreshDto })
     @ApiResponse({ status: 401, description: '유효하지 않은 토큰입니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 401, description: 'Refresh token이 만료되었습니다. 다시 로그인 하세요.', type: ErrorResponseDto })
