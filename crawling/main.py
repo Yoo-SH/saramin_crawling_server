@@ -7,6 +7,7 @@ import pandas as pd
 
 # .env 파일에서 환경 변수 로드
 load_dotenv()
+
 if __name__ == "__main__":
     keyword = input("검색할 키워드를 입력하세요: ")
     pages = input("크롤링할 페이지 수를 입력하세요 (기본값: 1): ")
@@ -27,25 +28,39 @@ if __name__ == "__main__":
         with engine.connect() as connection:
             print("DB 연결 성공")
 
-            # 전체 데이터 저장
-            df.to_sql("jobs", engine, if_exists="append", index=False)
-            print("jobs 데이터 저장 완료")
+            # 트랜잭션 시작
+            trans = connection.begin()
+            try:
+                # company 열만 추출 후 name 열로 변경
+                company_df = df[["company"]].rename(columns={"company": "name"})
 
-            # company 열만 추출 후 name 열로 변경
-            company_df = df[["company"]].rename(columns={"company": "name"})
+                # 중복 제거 로직 추가
+                existing_names = pd.read_sql("SELECT name FROM company", connection)
+                unique_company_df = company_df[
+                    ~company_df["name"].isin(existing_names["name"])
+                ]
 
-            # 중복 제거 로직 추가
-            existing_names = pd.read_sql("SELECT name FROM company", connection)
-            unique_company_df = company_df[
-                ~company_df["name"].isin(existing_names["name"])
-            ]
+                if not unique_company_df.empty:
+                    unique_company_df.to_sql(
+                        "company", engine, if_exists="append", index=False
+                    )
+                    print(
+                        f"{len(unique_company_df)}개의 새로운 company 데이터 저장 완료"
+                    )
 
-            if not unique_company_df.empty:
-                unique_company_df.to_sql(
-                    "company", engine, if_exists="append", index=False
-                )
-                print(f"{len(unique_company_df)}개의 새로운 company 데이터 저장 완료")
-            else:
-                print("중복된 데이터로 인해 저장할 항목이 없습니다.")
+                    # jobs 데이터 저장
+                    df.to_sql("jobs", engine, if_exists="append", index=False)
+                    print(f"jobs 데이터 저장 완료: {len(df)}개의 항목 저장됨")
+
+                    # 트랜잭션 커밋
+                    trans.commit()
+                else:
+                    print("중복된 데이터로 인해 저장할 항목이 없습니다.")
+                    # 트랜잭션 롤백
+                    trans.rollback()
+            except Exception as e:
+                # 오류 발생 시 롤백
+                trans.rollback()
+                print("트랜잭션 롤백: 에러 발생:", e)
     except Exception as e:
         print("에러 발생:", e)
