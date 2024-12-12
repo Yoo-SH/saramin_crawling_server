@@ -13,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import { CreateRefreshDto } from './dto/request/create-refresh.dto';
 import { DeleteUserDto } from './dto/request/delete-user.dto';
 import { Response } from 'express';
+import { Bookmarks } from '../bookmarks/entity/bookmarks.entity';
 
 interface Token {
     accessToken: string; //액세스 토큰
@@ -317,26 +318,26 @@ export class AuthService {
 
         try {
             const user = await queryRunner.manager.findOne(Users, { where: { id: user_id } });
-            if (!user) {
-                throw new NotFoundException('해당 유저를 찾을 수 없습니다. deleteUser');
-            }
+            if (!user) throw new NotFoundException('해당 유저를 찾을 수 없습니다.');
 
             const auth = await queryRunner.manager.findOne(Auth, { where: { user: { id: user_id } } });
-            if (!auth) {
-                throw new NotFoundException('인증 정보를 찾을 수 없습니다.');
-            }
+            if (!auth) throw new NotFoundException('인증 정보를 찾을 수 없습니다.');
+
+            const bookmarks = await queryRunner.manager.find(Bookmarks, { where: { user: { id: user_id } } });
 
             // 비밀번호 검증
             const isValidPassword = await bcrypt.compare(password, auth.password);
-            if (!isValidPassword) {
-                throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+            if (!isValidPassword) throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+
+            // 북마크 삭제
+            for (const bookmark of bookmarks) {
+                await queryRunner.manager.remove(bookmark);
             }
 
             // 유저 및 인증 정보 삭제
-
             await queryRunner.manager.remove(auth);
-
             await queryRunner.manager.remove(user);
+
             // 트랜잭션 커밋
             await queryRunner.commitTransaction();
 
@@ -346,13 +347,17 @@ export class AuthService {
             };
         } catch (error) {
             // 트랜잭션 롤백
-            await queryRunner.rollbackTransaction();
+            try {
+                await queryRunner.rollbackTransaction();
+            } catch (rollbackError) {
+                console.error("회원탈퇴시, 트랜젝션에서 심각한 에러가 발생하였습니다.") //회원 탈퇴와 같은 많은 트랜잭션이 발생하는 곳은 실패할 가능성이 아주 조금 있기에 콘솔기록을 남긴다.
+            }
 
-            // 예외 처리 전달
-            if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
+            // 에러 로그 기록 및 예외 전달
+            console.error(error);
+            if (error instanceof NotFoundException || error instanceof UnauthorizedException) {
                 throw error;
             }
-            console.log(error);
             throw new InternalServerErrorException('회원 탈퇴 중 오류가 발생했습니다.');
         } finally {
             // 트랜잭션 해제
@@ -360,3 +365,4 @@ export class AuthService {
         }
     }
 }
+
