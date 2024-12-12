@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 class DataResponsePutAuthProfileDto {
-    @ApiProperty({ example: '운영진' })
+    @ApiProperty({ example: '홍길동동이' })
     username: string;
 }
 

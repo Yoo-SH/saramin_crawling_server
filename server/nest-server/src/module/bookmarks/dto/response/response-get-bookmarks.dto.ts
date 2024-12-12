@@ -6,7 +6,35 @@ class IdDto {
     @ApiProperty({ type: UserDto })
     user: UserDto;
 
-    @ApiProperty({ type: JobDto, isArray: true })
+    @ApiProperty({
+        type: JobDto, isArray: true, example: [{
+            id: "",
+            company: "",
+            title: "",
+            link: "",
+            location: "",
+            experience: "",
+            education: "",
+            employment_type: "",
+            deadline: "",
+            sector: "",
+            salary: "",
+            viewCount: ""
+        }, {
+            id: "",
+            company: "",
+            title: "",
+            link: "",
+            location: "",
+            experience: "",
+            education: "",
+            employment_type: "",
+            deadline: "",
+            sector: "",
+            salary: "",
+            viewCount: ""
+        }]
+    })
     bookmark_job: JobDto[];
 }
 

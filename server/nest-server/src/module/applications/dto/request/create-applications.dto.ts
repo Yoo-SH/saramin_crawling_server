@@ -7,7 +7,7 @@ export class CreateApplicationsDto {
     @IsNotEmpty({ message: '이력서는 필수 입력값입니다.' })
     resume: string;
 
-    @ApiProperty({ description: 'job_id', example: 1, })
+    @ApiProperty({ description: 'job_id', example: 570, })
     @IsInt()
     @IsPositive()
     @IsNotEmpty()

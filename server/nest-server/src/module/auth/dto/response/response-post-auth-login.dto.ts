@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 class DataResponsePostAuthLoginDto {
-    @ApiProperty({ example: "운영진" })
+    @ApiProperty({ example: "홍길동" })
     username: string;
 
-    @ApiProperty({ example: "asd137486@jbnu.ac.kr" })
+    @ApiProperty({ example: "test@jbnu.ac.kr" })
     email: string
 }
 

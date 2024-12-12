@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+
 export class UserDto {
     @ApiProperty({ example: 28 })
     id: number;
@@ -19,3 +20,4 @@ export class UserDto {
     @ApiProperty({ example: null })
     deleteAt: string | null;
 }
+

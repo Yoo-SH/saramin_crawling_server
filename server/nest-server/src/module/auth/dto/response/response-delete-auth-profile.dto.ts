@@ -7,6 +7,6 @@ export class ResponseDeleteAuthProfileDto {
     @ApiProperty({ example: "회원 탈퇴가 완료되었습니다." })
     message: string;
 
-    @ApiProperty({ example: 201 })
+    @ApiProperty({ example: 200 })
     statusCode: number;
 }
