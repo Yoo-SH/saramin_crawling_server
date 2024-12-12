@@ -46,7 +46,7 @@ export class JobsController {
     }
 
     @ApiOperation({ summary: '채용공고 수정' })
-    @ApiResponse({ status: 201, description: '성공(data는 body와 동일)', type: ResponsePutJobsIdDto })
+    @ApiResponse({ status: 200, description: '성공(data는 body와 동일)', type: ResponsePutJobsIdDto })
     @ApiResponse({ status: 404, description: '해당 공고가 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '공고 수정 중 서버에서 에러가 발생했습니다.', type: ErrorResponseDto })
     @ApiSecurity('cookieAuth')
@@ -57,7 +57,7 @@ export class JobsController {
     }
 
     @ApiOperation({ summary: '채용공고 삭제' })
-    @ApiResponse({ status: 201, description: '성공(data는 body와 동일)', type: ResponseDeleteJobsIdDto })
+    @ApiResponse({ status: 200, description: '성공(data는 body와 동일)', type: ResponseDeleteJobsIdDto })
     @ApiResponse({ status: 404, description: '해당 공고가 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '공고 삭제 중 서버에서 에러가 발생했습니다.', type: ErrorResponseDto })
     @ApiSecurity('cookieAuth')

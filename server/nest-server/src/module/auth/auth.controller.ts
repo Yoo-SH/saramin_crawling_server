@@ -53,7 +53,7 @@ export class AuthController {
 
 
     @ApiOperation({ summary: '토큰 갱신' })
-    @ApiResponse({ status: 201, description: '토큰이 갱신 되었습니다.', type: ResponsePostAuthRefreshDto })
+    @ApiResponse({ status: 200, description: '토큰이 갱신 되었습니다.', type: ResponsePostAuthRefreshDto })
     @ApiResponse({ status: 401, description: '유효하지 않은 토큰입니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 401, description: 'Refresh token이 만료되었습니다. 다시 로그인 하세요.', type: ErrorResponseDto })
     @ApiResponse({ status: 404, description: '해당 유저를 찾을 수 없습니다. updateRefreshToken', type: ErrorResponseDto })
@@ -65,7 +65,7 @@ export class AuthController {
 
 
     @ApiOperation({ summary: '프로필 수정' })
-    @ApiResponse({ status: 201, description: '프로필이 수정되었습니다.', type: ResponsePutAuthProfileDto })
+    @ApiResponse({ status: 200, description: '프로필이 수정되었습니다.', type: ResponsePutAuthProfileDto })
     @ApiResponse({ status: 404, description: '해당 유저를 찾을 수 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 409, description: '이미 사용 중인 이름입니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 401, description: '비밀번호가 일치하지 않습니다.', type: ErrorResponseDto })
@@ -78,7 +78,7 @@ export class AuthController {
     }
 
     @ApiOperation({ summary: '회원 탈퇴' })
-    @ApiResponse({ status: 201, description: '회원 탈퇴가 완료되었습니다.', type: ResponseDeleteAuthProfileDto })
+    @ApiResponse({ status: 200, description: '회원 탈퇴가 완료되었습니다.', type: ResponseDeleteAuthProfileDto })
     @ApiResponse({ status: 404, description: '해당 유저를 찾을 수 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 404, description: '인증 정보를 찾을 수 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 401, description: '비밀번호가 일치하지 않습니다.', type: ErrorResponseDto })

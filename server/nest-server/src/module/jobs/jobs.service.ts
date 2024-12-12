@@ -126,7 +126,7 @@ export class JobsService {
 
             await this.repo_jobs.save(job);
 
-            return { messeges: '성공', data: job, statusCode: 200 };
+            return { messeges: '성공', data: job, statusCode: 201 };
         } catch (error) {
             return new InternalServerErrorException('공고 등록 중 서버에서 에러가 발생했습니다.');
         }
