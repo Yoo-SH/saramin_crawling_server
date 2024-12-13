@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { ResponseGetUsersAllDto } from './dto/response/response-get-users-all.dto';
 import { ResponseGetUsersSearchDto } from './dto/response/response-get-users-search.dto';
 import { ResponseGetUsersIdDto } from './dto/response/response-get-users-id.dto';
@@ -21,6 +21,7 @@ export class UsersController {
 
 
     @ApiOperation({ summary: '유저 이름으로 특정 유저 조회' })
+    @ApiParam({ name: 'name', example: '홍길동', description: '유저 이름', required: true })
     @ApiResponse({ status: 200, description: '성공', type: ResponseGetUsersSearchDto })
     @ApiResponse({ status: 404, description: '해당 이름의 사용자가 존재하지 않습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '사용자 조회 중 오류가 발생했습니다.', type: ErrorResponseDto })

@@ -2,14 +2,20 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { Repository } from 'typeorm';
 import { Bookmarks } from './entity/bookmarks.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Jobs } from '../jobs/entity/jobs.entity';
 
 @Injectable()
 export class BookmarksService {
-    constructor(@InjectRepository(Bookmarks) private readonly repo_bookmarks: Repository<Bookmarks>) { }
+    constructor(@InjectRepository(Bookmarks) private readonly repo_bookmarks: Repository<Bookmarks>,
+        @InjectRepository(Jobs) private readonly repo_jobs: Repository<Jobs>
+
+    ) { }
 
     async createBookmarkToggle(user_id: number, job_id: number) {
         try {
-            if (!job_id) {
+            const job = await this.repo_jobs.findOne({ where: { id: job_id } });
+
+            if (!job) {
                 throw new NotFoundException('job_id가 없습니다.');
             }
             const existingBookmark = await this.repo_bookmarks.findOne({ where: { user: { id: user_id }, job: { id: job_id } }, relations: ['user', 'job'] });
@@ -26,6 +32,7 @@ export class BookmarksService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException("북마크 토글과정 중 서버에서 에러가 발생했습니다.");
         }
     }
@@ -49,13 +56,23 @@ export class BookmarksService {
 
             // 사용자별로 북마크를 그룹화합니다.
             const groupedBookmarks = bookmarks.reduce((acc, bookmark) => {
+                // bookmark.user와 bookmark.job이 정의되지 않은 경우 처리
+                if (!bookmark.user || !bookmark.job) {
+                    console.warn('Invalid bookmark data:', bookmark);
+                    return acc;
+                }
+
                 const userId = bookmark.user.id;
+
+                // 그룹화된 사용자 항목이 없는 경우 초기화
                 if (!acc[userId]) {
                     acc[userId] = {
                         user: bookmark.user,
-                        bookmark_job: [],
+                        bookmarks: [], // bookmarks 배열 초기화
                     };
                 }
+
+                // 북마크 추가
                 acc[userId].bookmarks.push(bookmark.job);
                 return acc;
             }, {});
@@ -72,9 +89,8 @@ export class BookmarksService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException('북마크 조회 과정 중 서버에서 에러가 발생했습니다.');
         }
     }
 }
-
-

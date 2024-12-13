@@ -38,6 +38,7 @@ export class ApplicationsService {
                 message: '지원이 완료되었습니다.', data: application, status: 201
             }
         } catch (error) {
+            console.error(error);
             throw new InternalServerErrorException("지원 중 서버에서 오류가 발생했습니다.");
         }
 
@@ -98,7 +99,7 @@ export class ApplicationsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
-            console.log(error);
+            console.error(error);
             throw new InternalServerErrorException('지원 목록 조회 중 서버에서 오류가 발생했습니다.');
         }
     }
@@ -125,7 +126,7 @@ export class ApplicationsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
-            console.log(error);
+            console.error(error);
             throw new InternalServerErrorException('지원 정보 삭제 중 서버에서 오류가 발생했습니다.');
         }
     }
