@@ -2,7 +2,7 @@ import { Controller, Post, Get, UseGuards, Req, Body } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
 import { CreateBookmarkDto } from './dto/request/create-bookmarks.dto';
 import { BookmarksService } from './bookmarks.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiSecurity, ApiParam } from '@nestjs/swagger';
 import { ResponseGetBookmarksDto } from './dto/response/response-get-bookmarks.dto';
 import { ResponsePostBookmarksDto } from './dto/response/response-post-bookmarks.dto';
 import { ErrorResponseDto } from 'src/common/dto/error-response.dto';

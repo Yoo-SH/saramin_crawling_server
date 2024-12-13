@@ -2,14 +2,20 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { Repository } from 'typeorm';
 import { Bookmarks } from './entity/bookmarks.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Jobs } from '../jobs/entity/jobs.entity';
 
 @Injectable()
 export class BookmarksService {
-    constructor(@InjectRepository(Bookmarks) private readonly repo_bookmarks: Repository<Bookmarks>) { }
+    constructor(@InjectRepository(Bookmarks) private readonly repo_bookmarks: Repository<Bookmarks>,
+        @InjectRepository(Jobs) private readonly repo_jobs: Repository<Jobs>
+
+    ) { }
 
     async createBookmarkToggle(user_id: number, job_id: number) {
         try {
-            if (!job_id) {
+            const job = await this.repo_jobs.findOne({ where: { id: job_id } });
+
+            if (!job) {
                 throw new NotFoundException('job_id가 없습니다.');
             }
             const existingBookmark = await this.repo_bookmarks.findOne({ where: { user: { id: user_id }, job: { id: job_id } }, relations: ['user', 'job'] });
@@ -26,6 +32,7 @@ export class BookmarksService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException("북마크 토글과정 중 서버에서 에러가 발생했습니다.");
         }
     }
