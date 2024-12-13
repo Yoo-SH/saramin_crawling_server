@@ -5,7 +5,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
 import { CreateJobsDto } from './dto/request/create-jobs.dto';
 import { UpdateJobsDto } from './dto/request/update-jobs.dot';
-import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiTags, ApiParam, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { ResponseGetJobsDto } from './dto/response/response-get-jobs.dto';
 import { ResponseGetJobsIdDto } from './dto/response/response-get-jobs-id.dto';
 import { ResponsePostJobsDto } from './dto/response/response-post-jobs.dto';
@@ -27,6 +27,7 @@ export class JobsController {
     }
 
     @ApiOperation({ summary: '특정 채용공고 조회' })
+    @ApiParam({ name: 'id', example: 570, description: '채용공고 ID' })
     @ApiResponse({ status: 200, description: '성공', type: ResponseGetJobsIdDto })
     @ApiResponse({ status: 404, description: '해당 공고가 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '공고 상세 조회 중 서버에서 에러가 발생했습니다.', type: ErrorResponseDto })
@@ -46,6 +47,7 @@ export class JobsController {
     }
 
     @ApiOperation({ summary: '채용공고 수정' })
+    @ApiParam({ name: 'id', example: 570, description: '채용공고 ID' })
     @ApiResponse({ status: 200, description: '성공(data는 body와 동일)', type: ResponsePutJobsIdDto })
     @ApiResponse({ status: 404, description: '해당 공고가 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '공고 수정 중 서버에서 에러가 발생했습니다.', type: ErrorResponseDto })
@@ -57,6 +59,7 @@ export class JobsController {
     }
 
     @ApiOperation({ summary: '채용공고 삭제' })
+    @ApiParam({ name: 'id', example: 570, description: '채용공고 ID' })
     @ApiResponse({ status: 200, description: '성공(data는 body와 동일)', type: ResponseDeleteJobsIdDto })
     @ApiResponse({ status: 404, description: '해당 공고가 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '공고 삭제 중 서버에서 에러가 발생했습니다.', type: ErrorResponseDto })

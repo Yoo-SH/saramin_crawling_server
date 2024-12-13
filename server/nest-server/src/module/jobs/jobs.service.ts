@@ -11,7 +11,6 @@ export class JobsService {
     constructor(@InjectRepository(Jobs) private readonly repo_jobs: Repository<Jobs>) { }
 
     async getJobs(getJobsDto: GetJobsDto) {
-
         try {
             const {
                 page = 1,
@@ -25,44 +24,50 @@ export class JobsService {
                 title,
             } = getJobsDto;
 
-            const pageSize = 20; //페이지 사이즈는 고정
-
-
+            const pageSize = 20; // 페이지 사이즈는 고정
             const query = this.repo_jobs.createQueryBuilder('job');
 
             // 필터링 조건
             if (keyword) {
-                query.andWhere('job.title LIKE :keyword OR job.company LIKE :keyword OR job.location LIKE :keyword OR job.employment_type LIKE :keyword OR job.salary LIKE :keyword OR job.sector LIKE :keyword', { keyword: `%${keyword}%` });
+                query.andWhere(
+                    'job.title LIKE :keyword OR job.company LIKE :keyword OR job.location LIKE :keyword OR job.employment_type LIKE :keyword OR job.salary LIKE :keyword OR job.sector LIKE :keyword',
+                    { keyword: `%${keyword}%` },
+                );
             }
             if (location) query.andWhere('job.location LIKE :location', { location: `%${location}%` });
             if (employment_type) query.andWhere('job.employment_type LIKE :employment_type', { employment_type: `%${employment_type}%` });
             if (salary) query.andWhere('job.salary LIKE :salary', { salary: `%${salary}%` });
-            if (sector) query.andWhere('job.sector LIKE :stack', { stack: `%${sector}%` });
+            if (sector) query.andWhere('job.sector LIKE :sector', { sector: `%${sector}%` });
             if (company) query.andWhere('job.company LIKE :company', { company: `%${company}%` });
             if (title) query.andWhere('job.title LIKE :title', { title: `%${title}%` });
 
-            // 정렬, 오름차순
-            query.orderBy(`job.${sortBy}`, 'ASC');
+            // 정렬 열 및 방식 검증
+            const allowedSortColumns = ['deadline', 'viewCount', 'salary'];
+            const sortColumn = allowedSortColumns.includes(sortBy) ? sortBy : 'deadline';
+            const order = 'ASC'; // 정렬 방식은 현재 고정(필요시 수정 가능)
+
+            query.orderBy(`job.${sortColumn}`, order);
 
             // 페이지네이션
             query.skip((page - 1) * pageSize).take(pageSize);
 
             const [jobs, total] = await query.getManyAndCount();
             if (jobs.length === 0 || total === 0) {
-                return { messeges: '데이터가 없습니다.', status: "error", statusCode: 404 };
+                return { messages: '데이터가 없습니다.', status: "error", statusCode: 404 };
             }
 
             return {
-                messeges: '성공',
+                messages: '성공',
                 data: jobs,
                 '총 개수': total,
                 '페이지 번호': page,
                 '페이지 크기': pageSize,
-                statusCode: 200
+                statusCode: 200,
             };
 
         } catch (error) {
-            return { messeges: '실패', data: error, statusCode: 400 };
+            console.error(error);
+            throw new InternalServerErrorException('공고 조회 중 서버에서 에러가 발생했습니다.');
         }
     }
 
@@ -92,6 +97,7 @@ export class JobsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException('공고 상세 조회 중 서버에서 에러가 발생했습니다.');
         }
     }
@@ -128,12 +134,14 @@ export class JobsService {
 
             return { messeges: '성공', data: job, statusCode: 201 };
         } catch (error) {
+            console.error(error);
             return new InternalServerErrorException('공고 등록 중 서버에서 에러가 발생했습니다.');
         }
     }
 
     async updateJob(job_id: number, updateJobsDto: any) {
         try {
+            console.log(job_id, updateJobsDto);
             const job = await this.repo_jobs.findOne({ where: { id: job_id } });
             if (!job) {
                 throw new NotFoundException('해당 공고가 없습니다.');
@@ -146,6 +154,7 @@ export class JobsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException('공고 수정 중 서버에서 에러가 발생했습니다.');
         }
     }
@@ -164,6 +173,7 @@ export class JobsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException('공고 삭제 중 서버에서 에러가 발생했습니다.');
         }
     }

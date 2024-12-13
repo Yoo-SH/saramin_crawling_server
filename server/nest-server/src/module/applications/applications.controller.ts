@@ -2,7 +2,7 @@ import { Controller, Post, UseGuards, Req, Body, Get, Query, Delete, Param } fro
 import { ApplicationsService } from './applications.service';
 import { JwtAuthGuard } from 'src/common/guard/jwt.auth.guard';
 import { CreateApplicationsDto } from './dto/request/create-applications.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiSecurity, ApiParam } from '@nestjs/swagger';
 import { ResponsePostApplicationsDto } from './dto/response/response-post-applications.dto';
 import { ResponseGetApplicationsDto } from './dto/response/response-get-applications.dto';
 import { ResponseDeleteApplicationsDto } from './dto/response/response-delete-applications.dto';
@@ -26,6 +26,9 @@ export class ApplicationsController {
     }
 
     @ApiOperation({ summary: '지원서 조회' })
+    @ApiParam({ name: 'user_id', description: '유저 아이디', required: false })
+    @ApiParam({ name: 'status', example: 'applying', description: '상태', required: false })
+    @ApiParam({ name: 'sortByDate', example: 'ASC', description: '날짜 정렬', required: false })
     @ApiResponse({ status: 200, description: '지원 목록 조회가 완료되었습니다.', type: ResponseGetApplicationsDto })
     @ApiResponse({ status: 404, description: '조회된 지원 목록이 없습니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '지원 목록 조회 중 서버에서 오류가 발생했습니다.', type: ErrorResponseDto })
