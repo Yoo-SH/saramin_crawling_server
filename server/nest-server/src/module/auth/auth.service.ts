@@ -303,7 +303,11 @@ export class AuthService {
                     throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
                 }
                 auth.password = await this.hashPassword(newPassword);
-                await this.repo_auth.save(auth);
+
+                await Promise.all([
+                    this.repo_users.save(user),
+                    this.repo_auth.save(auth)
+                ]);
             }
 
             return {
