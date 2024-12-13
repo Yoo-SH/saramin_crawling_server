@@ -97,6 +97,7 @@ export class JobsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException('공고 상세 조회 중 서버에서 에러가 발생했습니다.');
         }
     }
@@ -133,12 +134,14 @@ export class JobsService {
 
             return { messeges: '성공', data: job, statusCode: 201 };
         } catch (error) {
+            console.error(error);
             return new InternalServerErrorException('공고 등록 중 서버에서 에러가 발생했습니다.');
         }
     }
 
     async updateJob(job_id: number, updateJobsDto: any) {
         try {
+            console.log(job_id, updateJobsDto);
             const job = await this.repo_jobs.findOne({ where: { id: job_id } });
             if (!job) {
                 throw new NotFoundException('해당 공고가 없습니다.');
@@ -151,6 +154,7 @@ export class JobsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException('공고 수정 중 서버에서 에러가 발생했습니다.');
         }
     }
@@ -169,6 +173,7 @@ export class JobsService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException('공고 삭제 중 서버에서 에러가 발생했습니다.');
         }
     }
