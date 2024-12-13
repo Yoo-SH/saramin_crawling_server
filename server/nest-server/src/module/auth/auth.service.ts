@@ -34,18 +34,22 @@ export class AuthService {
     async createUser(createUserDto: CreateUserDto) {
         const { user_name, email, password } = createUserDto;
 
+        const [existingUser, existingEmail] = await Promise.all([
+            this.repo_users.findOne({ where: { name: user_name } }),
+            this.repo_auth.findOne({ where: { email } }),
+        ]);
+
+
+        // 중복된 email 체크
+        if (existingEmail) {
+            throw new ConflictException('이미 사용 중인 이메일입니다.');
+        }
 
         // 중복된 name 체크
-        const existingUser = await this.repo_users.findOne({ where: { name: user_name } });
         if (existingUser) {
             throw new ConflictException('이미 사용 중인 이름입니다.');
         }
 
-        // 중복된 email 체크
-        const existingEmail = await this.repo_auth.findOne({ where: { email } });
-        if (existingEmail) {
-            throw new ConflictException('이미 사용 중인 이메일입니다.');
-        }
 
         const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
 
@@ -60,7 +64,6 @@ export class AuthService {
 
             // Users 엔티티 저장 (트랜잭션 사용)
             const savedUser = await queryRunner.manager.save(user);
-
             // Auth 엔티티 생성 및 Users 엔티티 연결
             const auth = new Auth();
             auth.user = savedUser;
@@ -72,6 +75,7 @@ export class AuthService {
 
             // 모든 작업 성공 시 커밋
             await queryRunner.commitTransaction();
+
 
             return {
                 message: '회원가입을 성공하였습니다.',
@@ -122,7 +126,6 @@ export class AuthService {
             // 로그인 이력 저장
             auth.user.lastLoginAt = new Date();
             await this.repo_users.save(auth.user);
-            console.log(new Date());
 
             // 쿠키 설정
             res.cookie('access_token', tokens.accessToken, {
@@ -172,7 +175,6 @@ export class AuthService {
         return { accessToken, refreshToken }; // 생성된 토큰 반환
     }
 
-
     /* 리프레시 토큰을 사용자 DB에 저장하는 메소드*/
     async saveRefreshToken(user_id: Users['id'], refreshToken: string) {
         const user = await this.repo_users.findOne({ where: { id: user_id } });
@@ -185,7 +187,6 @@ export class AuthService {
         auth.refreshToken = refreshToken;
         return await this.repo_auth.save(auth);
     }
-
 
     /* 새로운 액세스 토큰 발급 메소드 */
     async createNewAccessTokenByRefreshToken(createRefreshDto: CreateRefreshDto, @Res() res: Response) {
@@ -220,6 +221,13 @@ export class AuthService {
                 maxAge: this.configService.get<number>('COOKIE_ACCESS_EXPIRES_IN'),
             });
 
+            res.cookie('refresh_token', tokens.refreshToken, {
+                httpOnly: true,
+                secure: this.configService.get<boolean>("COOKIE_REFRESH_HTTPS"),
+                sameSite: 'strict',
+                maxAge: this.configService.get<number>('COOKIE_REFRESH_EXPIRES_IN'),
+            });
+
             return res.status(HttpStatus.OK).json({
                 message: '토큰이 갱신되었습니다.',
                 data: {
@@ -240,6 +248,7 @@ export class AuthService {
 
     async createLogout(user_id: Users['id'], @Req() req: Request, @Res() res: Response) {
         try {
+            console.log('req.cookies:', req.cookies['refresh_token']);
             await this.removeRefreshToken(req.cookies['refresh_token']);
 
             // 쿠키 삭제
