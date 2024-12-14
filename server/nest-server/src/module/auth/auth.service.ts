@@ -14,6 +14,7 @@ import { CreateRefreshDto } from './dto/request/create-refresh.dto';
 import { DeleteUserDto } from './dto/request/delete-user.dto';
 import { Response } from 'express';
 import { Bookmarks } from '../bookmarks/entity/bookmarks.entity';
+import { stat } from 'fs';
 
 interface Token {
     accessToken: string; //액세스 토큰
@@ -78,9 +79,11 @@ export class AuthService {
 
 
             return {
+                status: 'success',
                 message: '회원가입을 성공하였습니다.',
-                data: { username: savedUser.name, email: auth.email },
                 statusCode: HttpStatus.CREATED,
+                data: { username: savedUser.name, email: auth.email }
+
             };
         } catch (error) {
             // 에러 발생 시 롤백
@@ -146,9 +149,10 @@ export class AuthService {
             //1 @Res() 데코레이터를 사용하면 Express의 Response 객체를 사용할 수 있습니다.
             //2.@Res()를 사용하면 NestJS의 기본 자동 반환 메커니즘을 사용할 수 없습니다. 즉, 직접 res.status().json()과 같은 방식으로 응답을 전송해 주어야 합니다.
             return res.status(HttpStatus.OK).json({
+                status: 'success',
                 message: '로그인에 성공하였습니다.',
-                data: { username: auth.user.name, email: auth.email },
                 statusCode: HttpStatus.OK,
+                data: { username: auth.user.name, email: auth.email }
             });
 
         } catch (error) {
@@ -229,11 +233,12 @@ export class AuthService {
             });
 
             return res.status(HttpStatus.OK).json({
+                status: 'success',
                 message: '토큰이 갱신되었습니다.',
+                statusCode: HttpStatus.OK,
                 data: {
                     username: user.name,
                 },
-                statusCode: HttpStatus.OK,
             });
         } catch (error) {
             if (error instanceof UnauthorizedException) {
@@ -256,6 +261,7 @@ export class AuthService {
             res.clearCookie('refresh_token');
 
             return res.status(HttpStatus.OK).json({
+                status: 'success',
                 message: '로그아웃 되었습니다.',
                 statusCode: HttpStatus.OK,
             });
@@ -311,9 +317,10 @@ export class AuthService {
             }
 
             return {
+                status: 'success',
                 message: '프로필이 수정되었습니다.',
-                data: { username: user.name },
                 statusCode: HttpStatus.OK,
+                data: { username: user.name }
             };
 
         } catch (error) {
@@ -358,6 +365,7 @@ export class AuthService {
             await queryRunner.commitTransaction();
 
             return {
+                status: 'success',
                 message: '회원 탈퇴가 완료되었습니다.',
                 statusCode: HttpStatus.OK,
             };
