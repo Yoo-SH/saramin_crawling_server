@@ -24,6 +24,7 @@ export class UsersService {
             }
 
         } catch (error) {
+            console.error(error);
             throw new InternalServerErrorException(`사용자 조회 중 오류가 발생했습니다.`);
         }
     }
@@ -52,6 +53,7 @@ export class UsersService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException(`사용자 조회 중 오류가 발생했습니다.`);
         }
 
@@ -80,6 +82,7 @@ export class UsersService {
             if (error instanceof NotFoundException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException(`사용자 조회 중 오류가 발생했습니다.`);
         }
     }

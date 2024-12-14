@@ -88,6 +88,8 @@ export class AuthService {
         } catch (error) {
             // 에러 발생 시 롤백
             await queryRunner.rollbackTransaction();
+
+            console.error(error);
             throw new HttpException(
                 {
                     message: '회원가입에 실패하였습니다.',
@@ -247,6 +249,7 @@ export class AuthService {
                 }
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException('토큰 갱신 중 오류가 발생했습니다.');
         }
     }
@@ -328,6 +331,7 @@ export class AuthService {
                 throw error;
             }
 
+            console.error(error);
             throw new InternalServerErrorException('프로필 수정 중 오류가 발생했습니다.');
         }
     }
@@ -382,6 +386,7 @@ export class AuthService {
             if (error instanceof NotFoundException || error instanceof UnauthorizedException) {
                 throw error;
             }
+            console.error(error);
             throw new InternalServerErrorException('회원 탈퇴 중 오류가 발생했습니다.');
         } finally {
             // 트랜잭션 해제
