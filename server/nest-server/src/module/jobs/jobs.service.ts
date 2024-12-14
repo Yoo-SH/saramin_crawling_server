@@ -57,12 +57,14 @@ export class JobsService {
             }
 
             return {
+                status: "success",
                 messages: '성공',
+                statusCode: 200,
                 data: jobs,
                 '총 개수': total,
                 '페이지 번호': page,
                 '페이지 크기': pageSize,
-                statusCode: 200,
+
             };
 
         } catch (error) {
@@ -91,7 +93,7 @@ export class JobsService {
                 .getMany();
 
 
-            return { messeges: '성공', data: { job, relatedJobs }, statusCode: 200 };
+            return { status: "success", messeges: '성공', statusCode: 200, data: { job, relatedJobs } };
 
         } catch (error) {
             if (error instanceof NotFoundException) {
@@ -132,7 +134,7 @@ export class JobsService {
 
             await this.repo_jobs.save(job);
 
-            return { messeges: '성공', data: job, statusCode: 201 };
+            return { status: "success", messeges: '성공', statusCode: 201, data: job };
         } catch (error) {
             console.error(error);
             return new InternalServerErrorException('공고 등록 중 서버에서 에러가 발생했습니다.');
@@ -149,7 +151,7 @@ export class JobsService {
 
             await this.repo_jobs.update(job_id, updateJobsDto);
 
-            return { messeges: '성공', data: job, statusCode: 200 };
+            return { status: "success", messeges: '성공', statusCode: 200, data: job };
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
@@ -168,7 +170,7 @@ export class JobsService {
 
             await this.repo_jobs.delete(job_id);
 
-            return { messeges: '성공', data: job, statusCode: 200 };
+            return { status: "success", messeges: '성공', statusCode: 200, data: job };
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;

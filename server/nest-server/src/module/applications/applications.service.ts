@@ -35,7 +35,10 @@ export class ApplicationsService {
             await this.repo_applications.save(application);
 
             return {
-                message: '지원이 완료되었습니다.', data: application, status: 201
+                status: "success",
+                message: '지원이 완료되었습니다.',
+                statusCode: 201,
+                data: application,
             }
         } catch (error) {
             console.error(error);
@@ -91,9 +94,11 @@ export class ApplicationsService {
             }, { user_id: user_id, jobs: [] });
 
             return {
+                status: "success",
                 message: '지원 목록 조회가 완료되었습니다.',
+                statusCode: 200,
                 data: userApplications,
-                status: 200,
+
             };
         } catch (error) {
             if (error instanceof NotFoundException) {
@@ -118,9 +123,11 @@ export class ApplicationsService {
             await this.repo_applications.remove(application);
 
             return {
+                status: "success",
                 message: '지원 정보가 삭제되었습니다.',
+                statusCode: 200,
                 data: application,
-                status: 200,
+
             };
         } catch (error) {
             if (error instanceof NotFoundException) {
