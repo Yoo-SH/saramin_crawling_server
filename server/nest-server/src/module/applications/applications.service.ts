@@ -35,7 +35,10 @@ export class ApplicationsService {
             await this.repo_applications.save(application);
 
             return {
-                message: '지원이 완료되었습니다.', data: application, status: 201
+                status: "success",
+                message: '지원이 완료되었습니다.',
+                statusCode: 201,
+                data: application,
             }
         } catch (error) {
             console.error(error);

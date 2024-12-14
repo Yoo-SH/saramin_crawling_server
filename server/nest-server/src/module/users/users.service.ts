@@ -39,12 +39,13 @@ export class UsersService {
             }
 
             return {
+                status: "success",
                 messege: "사용자 조회 성공",
+                statusCode: HttpStatus.OK,
                 data: {
                     user_id: user.id,
                     user_name: user.name
                 },
-                statusCode: HttpStatus.OK
             }
 
         } catch (error) {
@@ -66,12 +67,13 @@ export class UsersService {
             }
 
             return {
+                status: "success",
                 messege: "사용자 조회 성공",
+                statusCode: HttpStatus.OK,
                 data: {
                     user_id: user.id,
                     user_name: user.name
-                },
-                statusCode: HttpStatus.OK
+                }
             }
 
         } catch (error) {

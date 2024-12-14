@@ -22,12 +22,12 @@ export class BookmarksService {
 
             if (existingBookmark) {
                 await this.repo_bookmarks.delete({ user: { id: user_id }, job: { id: job_id } });
-                return { messeges: '북마크가 해제되었습니다.', data: { user: existingBookmark.user.id, job: existingBookmark.job.id }, statusCode: 200 };
+                return { status: "success", messeges: '북마크가 해제되었습니다.', statusCode: 200, data: { user: existingBookmark.user.id, job: existingBookmark.job.id } };
             }
 
             const bookmark = this.repo_bookmarks.create({ user: { id: user_id }, job: { id: job_id } });
             await this.repo_bookmarks.save(bookmark);
-            return { messeges: '북마크가 되었습니다', data: { user: bookmark.user.id, job: bookmark.job.id }, statusCode: 200, };
+            return { status: "success", messeges: '북마크가 되었습니다', statusCode: 200, data: { user: bookmark.user.id, job: bookmark.job.id } };
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
@@ -78,12 +78,14 @@ export class BookmarksService {
             }, {});
 
             return {
+                status: 'success',
                 messages: '성공',
+                statusCode: 200,
                 data: groupedBookmarks,
                 total: totalCount,
                 currentPage: page,
                 totalPages: Math.ceil(totalCount / limit),
-                statusCode: 200,
+
             };
         } catch (error) {
             if (error instanceof NotFoundException) {
