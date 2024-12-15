@@ -14,6 +14,7 @@ export class BookmarksController {
 
     @ApiOperation({ summary: '북마크 추가 및 삭제' })
     @ApiResponse({ status: 201, description: '북마크가 되었습니다./북마크가 해제되었습니다.', type: ResponsePostBookmarksDto })
+    @ApiResponse({ status: 400, description: 'job_id가 숫자가 아닙니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '북마크 토글과정 중 서버에서 에러가 발생했습니다.', type: ErrorResponseDto })
     @ApiSecurity('cookieAuth')
     @UseGuards(JwtAuthGuard)
