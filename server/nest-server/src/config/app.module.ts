@@ -31,7 +31,6 @@ import { CompanyModule } from 'src/module/company/company.module';
         database: configService.get<string>('DB_DATABASE'), // 환경 변수 DB_DATABASE 사용
         entities: [__dirname + '/../**/*.entity.{js,ts}'], // 엔티티 파일 경로
         synchronize: configService.get<boolean>('DB_SYNCHRONIZE'), // true로 설정하면 데이터베이스가 자동으로 동기화됨 (주의: 실제 운영 환경에서는 false로 설정 권장)
-
       }),
     }),
 

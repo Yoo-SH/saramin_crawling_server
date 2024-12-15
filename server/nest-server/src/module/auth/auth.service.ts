@@ -136,14 +136,14 @@ export class AuthService {
             res.cookie('access_token', tokens.accessToken, {
                 httpOnly: true,
                 secure: this.configService.get<boolean>("COOKIE_ACCESS_HTTPS"), //https에서만 쿠키 전송할지 여부
-                sameSite: 'strict', //쿠키가 다른 도메인으로 전송되는 것을 방지하기 위해 사용
+                sameSite: 'lax', //쿠키가 다른 도메인으로 전송되는 것을 방지하기 위해 사용
                 maxAge: this.configService.get<number>("COOKIE_ACCESS_EXPIRES_IN"),
             });
 
             res.cookie('refresh_token', tokens.refreshToken, {
                 httpOnly: true,
                 secure: this.configService.get<boolean>("COOKIE_REFRESH_HTTPS"), //https에서만 쿠키 전송할지 여부
-                sameSite: 'strict', //쿠키가 다른 도메인으로 전송되는 것을 방지하기 위해 사용
+                sameSite: 'lax', //쿠키가 다른 도메인으로 전송되는 것을 방지하기 위해 사용
                 maxAge: this.configService.get<number>("COOKIE_REFRESH_EXPIRES_IN"),
             });
 
@@ -223,14 +223,14 @@ export class AuthService {
             res.cookie('access_token', tokens.accessToken, {
                 httpOnly: true,
                 secure: this.configService.get<boolean>("COOKIE_ACCESS_HTTPS"),
-                sameSite: 'strict',
+                sameSite: 'lax',
                 maxAge: this.configService.get<number>('COOKIE_ACCESS_EXPIRES_IN'),
             });
 
             res.cookie('refresh_token', tokens.refreshToken, {
                 httpOnly: true,
                 secure: this.configService.get<boolean>("COOKIE_REFRESH_HTTPS"),
-                sameSite: 'strict',
+                sameSite: 'lax',
                 maxAge: this.configService.get<number>('COOKIE_REFRESH_EXPIRES_IN'),
             });
 

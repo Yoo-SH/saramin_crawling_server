@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCompanyDto {
     @ApiProperty({ example: 1 })
-    @IsNumber()
+    @IsNumber({}, { message: '회사 ID는 숫자여야 합니다.' })
     @IsNotEmpty({ message: '회사 ID는 필수 입력 값입니다.' })
     readonly company_id: number;
 
