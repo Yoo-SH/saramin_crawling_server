@@ -16,6 +16,11 @@ export class ApplicationsController {
 
     @ApiOperation({ summary: '지원서 작성' })
     @ApiResponse({ status: 201, description: '지원이 완료되었습니다.', type: ResponsePostApplicationsDto })
+    @ApiResponse({ status: 400, description: '이력서는 필수 입력값입니다.', type: ErrorResponseDto })
+    @ApiResponse({ status: 400, description: '이력서는 문자열이어야 합니다.', type: ErrorResponseDto })
+    @ApiResponse({ status: 400, description: 'job_id는 정수여야 합니다.', type: ErrorResponseDto })
+    @ApiResponse({ status: 400, description: 'job_id는 필수 입력값입니다.', type: ErrorResponseDto })
+    @ApiResponse({ status: 400, description: 'job_id는 양수여야 합니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 409, description: '이미 지원한 공고입니다.', type: ErrorResponseDto })
     @ApiResponse({ status: 500, description: '지원 중 서버에서 오류가 발생했습니다.', type: ErrorResponseDto })
     @ApiSecurity('cookieAuth')
