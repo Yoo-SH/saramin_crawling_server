@@ -5,7 +5,7 @@ module.exports = {
             script: 'dist/main.js',
             cwd: '/home/ubuntu/saramin_server/server/nest-server/', // 프로젝트 루트 경로
             env_production: {
-                NODE_ENV: 'production',
+                NODE_ENV: 'production.local',
             },
         },
     ],
