@@ -299,13 +299,62 @@ async hashPassword(password: string): Promise<string> {
 
 # `API 문서화 (Swagger)`
 ### Swagger 문서 작성
-- API 엔드포인트 설명
-- 요청/응답 스키마 정의
-- 인증 방식 설명
-- 에러 코드 및 처리 방법
-- 테스트 데이터 제공
-- API 사용 예제 작성
-   
+
+**요청/응답 스키마 정의**
+```javascript
+    export class CreateJobsDto {
+    @ApiProperty({ example: '(주)씨아이랩스', description: '회사명' })
+    @IsString({ message: 'compnay는 문자열 입니다.' })
+    @IsOptional()
+    company: string;
+
+    @ApiProperty({ example: '경력직 풀스택 개발자(ReactJS/Nodejs/ 등) 구인공고', description: '제목' })
+    @IsString({ message: 'title는 문자열 입니다.' })
+    @IsOptional()
+    title: string;
+
+    @ApiProperty({ example: 'https://www.saramin.co.kr/zf_user/jobs/relay/view?view_type=search&rec_idx=49371713&location=ts&searchword=node+js&searchType=search&paid_fl=n&search_uuid=61cd8441-b754-4080-b9f0-2821b30aa8b3', description: '링크' })
+    @IsOptional()
+    @IsUrl({ protocols: ['http', 'https'], require_protocol: true }, { message: "link가 url 형식이 아닙니다." })
+    link: string;
+
+    @ApiProperty({ example: '경기 고양시 일산동구', description: '지역' })
+    @IsString({ message: 'location는 문자열 입니다.' })
+    @IsOptional()
+    location: string;
+
+    @ApiProperty({ example: '경력6년↑', description: '경력' })
+    @IsString({ message: 'experience는 문자열 입니다.' })
+    @IsOptional()
+    experience: string;
+
+    @ApiProperty({ example: '학력무관', description: '학력' })
+    @IsString({ message: 'education는 문자열 입니다.' })
+    @IsOptional()
+    education: string;
+
+    @ApiProperty({ example: '정규직', description: '고용형태' })
+    @IsString({ message: 'employment_type는 문자열 입니다.' })
+    @IsOptional()
+    employment_type: string;
+
+    @ApiProperty({ example: '"~ 01/10(금)', description: '마감일' })
+    @IsString({ message: 'deadline는 문자열 입니다.' })
+    @IsOptional()
+    deadline: string;
+
+    @ApiProperty({ example: 'ReactJS, JSP, 앱개발, 웹개발, API', description: '업종' })
+    @IsString({ message: 'sector는 문자열 입니다.' })
+    @IsOptional()
+    sector: string;
+
+    @ApiProperty({ example: '성과급/상여금', description: '급여' })
+    @IsString({ message: 'salary는 문자열 입니다.' })
+    @IsOptional()
+    salary: string;
+}
+```
+**API 사용 예제 작성**/**API 엔드포인트 설명**/**테스트 데이터 제공**/
 ```javascript
      @ApiOperation({ summary: '토큰 갱신' }) // 401 응답 시 /auth/refresh 엔드포인트를 통해 새 Access Token을 요청하도록 클라이언트 측에서 처리
     @ApiResponse({ status: 200, description: '토큰이 갱신 되었습니다.', type: ResponsePostAuthRefreshDto })
@@ -320,6 +369,8 @@ async hashPassword(password: string): Promise<string> {
         return this.authService.createNewAccessTokenByRefreshToken(body, res);
     }
 ```
+![Image](https://github.com/user-attachments/assets/c346d8bc-fa82-434a-a2e6-53eada120894)
+
 ### API 테스트 환경 구성
 **Swagger UI 설정**/**환경별 설정 관리**
 ```javascript
