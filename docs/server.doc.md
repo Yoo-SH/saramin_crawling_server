@@ -1,3 +1,17 @@
+# 목차
+1. [웹 크롤링 구현](#웹-크롤링-구현)
+2. [데이터베이스 설계 및 구현](#데이터베이스-설계-및-구현)
+3. [API 기능 구현](#API-기능-구현)
+8. [인증 및 보안 구현](#인증-및-보안-구현)
+11. [API 문서화 (Swagger)](#API-문서화-Swagger)
+12. [API 테스트 환경 구성](#API-테스트-환경-구성)
+13. [에러 처리 및 로깅](#에러-처리-및-로깅)
+14. [로깅 시스템 구축](#로깅-시스템-구축)
+15. [모듈화](#코드-최적화-및-모듈화)
+
+<br>
+<br>
+
 # `웹 크롤링 구현`
 **사람인 웹사이트 크롤링 구현**/**크롤링을 위한 beautifulsoup4,  pandas라이브러리 활용**
 ```python
@@ -114,6 +128,9 @@ def main():
         print("작업 실패: ", e)
 ```
 
+<br>
+<br>
+
 # `데이터베이스 설계 및 구현`
 - **데이터베이스 스키마 설계**
     - 사용자 정보, 채용 정보, 회사 정보, 지원 정보, 북마크 정보 
@@ -131,6 +148,8 @@ def main():
 
 ![image](https://github.com/user-attachments/assets/d9fa6df6-a535-45b1-8992-5dbc91349713)
 
+<br>
+<br>
 
 # `API 기능 구현`
 **필터링 및 검색 기능**/ **페이지네이션 처리**/ **정렬 기능**
@@ -320,6 +339,8 @@ export class CreateLoginDto {
     password: string;
 }
 ```
+<br>
+<br>
 
 # `인증 및 보안 구현`
 **JWT 기반 인증**/**Access Token 발급 및 검증**/**Refresh Token 구현**/**토큰 갱신 메커니즘**/
@@ -398,6 +419,8 @@ async hashPassword(password: string): Promise<string> {
         return bcrypt.hash(password, salt);
     }
 ```
+<br>
+<br>
 
 # `API 문서화 (Swagger)`
 **요청/응답 스키마 정의**
@@ -470,6 +493,8 @@ async hashPassword(password: string): Promise<string> {
     }
 ```
 ![Image](https://github.com/user-attachments/assets/c346d8bc-fa82-434a-a2e6-53eada120894)
+<br>
+<br>
 
 # `API 테스트 환경 구성`
 **Swagger UI 설정**/**환경별 설정 관리**
@@ -497,6 +522,8 @@ async hashPassword(password: string): Promise<string> {
     SwaggerModule.setup(swaggerPath, app, document);
   }
 ```
+<br>
+<br>
 
 # `에러 처리 및 로깅`
 **에러 처리 구현**/**글로벌 에러 핸들러**
@@ -546,6 +573,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
 }
 ```
+<br>
+<br>
 
 # `로깅 시스템 구축` 
 **요청-응답 로깅**/**성능 모니터링**
@@ -588,6 +617,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
   const logLevels = configService.get<string>('LOG_LEVEL').split(',');
   app.useLogger(logLevels as any); // useLogger의 타입과 맞추기 위해 any로 캐스팅
 ```
+<br>
+<br>
 
 # `코드 최적화 및 모듈화`
 **MVC 아키텍처 패턴 적용**/**프로젝트 폴더 구조 최적화**/**의존성 주입 패턴 적용**/**모듈화**
@@ -796,4 +827,5 @@ NestJS는 모듈 기반 구조로 동작하며, 기능별 모듈화를 통해 �
 })
 export class ProductModule {}
 ```
+
 
